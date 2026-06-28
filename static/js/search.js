@@ -228,6 +228,11 @@ export function setupSearch(){
     $('#filter-icon').on('click', function(){
         $('#filter-frame').toggle()
     })
+    // The "=> Filters" button now opens the filter panel too (clearer than the
+    // funnel icon alone). Long-press still clears all filters.
+    $('#to-filter').on('click', function(){
+        $('#filter-frame').toggle()
+    })
     $('#search-keys').on('click', function(ev){
         ev.stopPropagation()
         clickOutsideToHide($('#search-keys-selections')[0], $('#search-keys')[0])

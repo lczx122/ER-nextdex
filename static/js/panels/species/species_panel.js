@@ -364,7 +364,22 @@ function changeBaseStat(node, value, statID, cmp) {
     })
 }
 
+// Show an ability/innate description in the dedicated panel (mobile-friendly,
+// no hover needed) and mark the tapped chip as the one being read.
+function showAbiDesc(abi, node) {
+    const box = document.getElementById('species-abi-desc')
+    if (box) {
+        box.classList.add('show')
+        box.innerHTML = ''
+        box.append(e('div', 'sp-abi-desc-name', abi.name))
+        box.append(e('div', 'sp-abi-desc-text', abi.desc || 'No description.'))
+    }
+    $('#species-abi-desc-active').removeAttr('id')
+    if (node) node.id = 'species-abi-desc-active'
+}
+
 function setAbilities(abilities, specie) {
+    let firstAbi = null, firstNode = null
     $('#species-abilities').empty().append(
         JSHAC(abilities.map((val, i) => {
             if (abilities[i] == abilities[i - 1] || abilities[i] === 0) {
@@ -378,12 +393,16 @@ function setAbilities(abilities, specie) {
                 name.classList.replace('sel-n-active', 'sel-active')
                 specie.activeAbi = i
                 setTypes([...new Set(specie.stats.types, abilitiesExtraType(specie.activeAbi, specie))], specie)
+                showAbiDesc(abi, name)
             }
             name.classList.add(i ? "sel-n-active" : "sel-active")
             longClickToFilter(0, name, "ability", () => { return abi.name })
+            if (!firstAbi) { firstAbi = abi; firstNode = name }
             return name
         }).filter(x => x))
     )
+    // Show the first ability's description by default.
+    if (firstAbi) showAbiDesc(firstAbi, firstNode)
 }
 
 function setInnates(innates) {
@@ -396,6 +415,7 @@ function setInnates(innates) {
             const name = e("div", "species-innate " + getHintInteractibilityClass(), inn.name)
             longClickToFilter(0, name, "ability", () => { return inn.name }, 0)
             addTooltip(name, inn.desc)
+            name.onclick = () => showAbiDesc(inn, name)
             return name
         }).filter(x => x))
     )
