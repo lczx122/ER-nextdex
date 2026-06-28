@@ -188,6 +188,16 @@ aside { gap: 2px; background: var(--surface); }
 .btn-active { background-color: var(--colorC) !important; color: var(--font-color); }
 .btn-active .big-select, .btn-active .small-select { color: var(--font-color); }
 .btn-active::after { content: ""; position: absolute; background: var(--accent); }
+/* Nav buttons must never pick up the "interactible" hint border — on touch it
+   sticks after a tap, drawing a stray outline and making the active tab taller
+   than the rest (which knocked the labels out of alignment). */
+aside .side-btn,
+aside .side-btn:hover,
+aside .interactible:hover,
+aside .filter-interactible:hover { border: 0 !important; }
+/* Reset the legacy auto/0 span margins so flex centering aligns every label
+   the same way (a lone .big-select was being pushed to the bottom). */
+aside .side-btn > span { margin: 0 !important; }
 @media (orientation: landscape) {
   aside { min-width: 10em; padding: var(--sp-2) 0; border-left: 1px solid var(--hairline); }
   .side-btn { align-items: center; }
