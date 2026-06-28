@@ -1,0 +1,371 @@
+/* =========================================================================
+   ER NextDex — UI redesign layer
+   Loaded LAST so it wins the cascade. Goals:
+   - One consistent, readable type scale (kills the vw/vh/vmax inconsistency)
+   - Sensible, predictable positioning for the header, search and nav
+   - Cleaner cards, badges, stat bars and buttons
+   It only restyles; it never changes the IDs/classes the JS depends on.
+   ========================================================================= */
+
+:root {
+  /* Type scale — fixed rem so text is identical on phone and desktop.
+     A couple of values use clamp() to stay sane across widths. */
+  --fs-2xs: 0.69rem;
+  --fs-xs:  0.78rem;
+  --fs-sm:  0.86rem;
+  --fs-base: 0.95rem;
+  --fs-md:  1.05rem;
+  --fs-lg:  1.2rem;
+  --fs-xl:  1.45rem;
+  --fs-2xl: 1.8rem;
+  --fs-title: clamp(1.05rem, 1rem + 1.4vw, 1.5rem);
+
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+
+  --radius: 10px;
+  --radius-sm: 7px;
+
+  --accent: var(--positive, #1fc990);
+  --hairline: color-mix(in srgb, var(--font-color, #fff) 14%, transparent);
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  font-size: var(--fs-base);
+  line-height: 1.4;
+  letter-spacing: 0.1px;
+}
+
+/* Tame the pixel-art crispness that was being applied to UI chrome icons —
+   keep it only for actual game sprites. */
+#settings-btn { image-rendering: auto; }
+
+/* ---------------------------------------------------------------- HEADER */
+#top-header {
+  height: auto;
+  min-height: 52px;
+  padding: calc(var(--safe-top, 0px) + 6px) var(--sp-3) 6px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  box-shadow: 0 1px 0 var(--hairline);
+}
+/* Undo the `#top-header > * { margin:auto }` that pushed everything around,
+   and lay it out as [filter] [title] [settings]. */
+#top-header > * { margin: 0; }
+.main-title {
+  order: 2;
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: var(--fs-title);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 0;
+  line-height: 1.1;
+}
+#top-header > div { order: 1; }     /* filter icon + counter */
+#settings-btn { order: 3; }
+
+#filter-icon, #settings-btn {
+  width: 26px !important;
+  height: 26px !important;
+  padding: 6px !important;
+  border-radius: var(--radius-sm);
+  box-sizing: content-box;
+}
+
+/* --------------------------------------------------------------- SEARCH */
+.search-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--sp-2) var(--sp-3);
+  gap: var(--sp-2);
+  align-items: stretch;
+  background: var(--colorB);
+  box-shadow: 0 1px 0 var(--hairline);
+}
+.search-keys-wrapper { width: auto !important; }
+#search-keys,
+#search-bar,
+.filter-search {
+  font-size: var(--fs-base) !important;
+  height: 40px;
+  box-sizing: border-box;
+}
+#search-keys {
+  min-width: 5.5em;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+  border: 1px solid var(--selActive);
+  font-weight: 600;
+}
+.main-search-label { width: auto !important; flex: 1 1 auto; }
+#search-bar {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  border: 1px solid var(--selActive);
+  border-left: 0;
+  background: var(--colorA);
+  color: var(--font-color);
+  text-align: left !important;
+  padding-left: 12px !important;
+}
+#search-bar::placeholder { color: color-mix(in srgb, var(--font-color) 55%, transparent); }
+#search-keys-selections,
+#search-suggestion > div { font-size: var(--fs-base) !important; }
+#search-suggestion > div,
+#search-keys-selections > div { padding: 8px 10px; }
+
+#to-filter {
+  width: auto !important;
+  padding: 0 var(--sp-3);
+  border-radius: var(--radius-sm);
+  background: var(--btnNActive);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  font-weight: 600;
+}
+#to-filter:hover { background: var(--selHover); }
+
+#filter-counter {
+  right: auto;
+  bottom: auto;
+  font-size: var(--fs-2xs) !important;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------ SIDE NAV */
+aside { gap: 2px; background: var(--colorB); }
+.side-btn {
+  font-size: var(--fs-sm) !important;
+  font-weight: 600;
+  padding: 10px 6px;
+  border-radius: 0;
+  gap: 1px;
+  line-height: 1.15;
+  position: relative;
+}
+.big-select { font-size: var(--fs-sm) !important; }
+.small-select { font-size: var(--fs-2xs) !important; opacity: 0.75; }
+/* Clear active indicator instead of relying on a faint bg difference. */
+.btn-active { background-color: var(--colorC) !important; }
+.btn-active::after {
+  content: "";
+  position: absolute;
+  background: var(--accent);
+}
+@media (orientation: landscape) {
+  aside { min-width: 9.5em; padding: var(--sp-2) 0; }
+  .side-btn { align-items: center; }
+  .btn-active::after { left: 0; top: 12%; bottom: 12%; width: 3px; border-radius: 3px; }
+}
+@media (orientation: portrait) {
+  aside { min-height: auto; padding: 2px 0 var(--safe-bottom, 0px); }
+  .side-btn { flex: 1; }
+  .btn-active::after { left: 18%; right: 18%; top: 0; height: 3px; border-radius: 3px; }
+}
+
+/* ------------------------------------------------------------- PANELS */
+.panel { font-size: var(--fs-base); }
+
+/* Data list (left column / portrait top strip) */
+.data-list { width: 8.5em; min-width: 8.5em; }
+.data-list-row { font-size: var(--fs-sm); border-radius: var(--radius-sm); }
+@media (orientation: landscape) {
+  .data-list { padding: var(--sp-1); gap: 1px; }
+  .data-list-row { padding: 7px 8px; }
+  .data-list-row:hover { background: var(--selHover); }
+}
+@media (orientation: portrait) {
+  .data-list { min-height: 64px; max-height: 64px; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
+}
+
+/* -------- Species panel -------- */
+.species-top { gap: var(--sp-2); padding: var(--sp-2); align-items: stretch; min-width: 0; width: 100%; box-sizing: border-box; }
+.species-top > * { min-width: 0; }
+#species-basestats, #species-coverage { min-width: 0; }
+.stat-row { min-width: 0; }
+.stat-bar { min-width: 16px; }
+.stat-num { flex: none; }
+/* Name / id / types row: never let the type badges clip off-screen. */
+.species-mid-stats {
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1) var(--sp-2);
+}
+/* On phones, drop the stat block to its own full-width row so the bars
+   (and their value badges) always have room instead of overflowing. */
+@media (orientation: portrait) {
+  .species-top { flex-wrap: wrap; }
+  #species-basestats, #species-coverage { flex-basis: 100%; }
+  /* sprite keeps its size; the two ability columns share the rest and wrap */
+  .species-abi-inn { max-width: none; flex: 1 1 0; min-width: 0; }
+  #species-front { height: 116px; width: 116px; flex: none; }
+  .stat-name { width: 2.8em; }
+  .stat-bar { height: 11px; }
+}
+.species-move-pwr { min-width: 2.2em; padding-right: 2px; }
+.abi-inn-info {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.8;
+  border-width: 1px;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+#species-innates, #species-abilities { font-size: var(--fs-sm) !important; gap: 2px; }
+
+#species-name {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+}
+#species-id { font-size: var(--fs-sm); opacity: 0.7; }
+
+.stat-row { font-size: var(--fs-sm) !important; gap: var(--sp-1); margin: 1px 0; }
+.stat-name { width: 2.4em; padding-left: 6px; opacity: 0.85; text-align: left; }
+.stat-num {
+  width: 2em; min-width: 2em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 4px;
+}
+.stat-bar { height: 9px; border-radius: 999px; overflow: hidden; }
+
+/* Type badges */
+.type {
+  border-radius: 999px;
+  padding: 3px 12px !important;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+#species-types { margin-left: 0; gap: var(--sp-1); }
+
+/* Compact type chips inside the dense coverage / resistance grids need less
+   padding and wider cells so 6-letter names (POISON, DRAGON…) don't truncate. */
+.species-coverage-list .type,
+.typecalc-coverage-list .type,
+.typecalc-info-row .type {
+  padding: 2px 5px !important;
+  letter-spacing: 0;
+  text-transform: none;            /* mixed-case is narrower → no truncation */
+  text-align: center;
+  justify-content: center;
+}
+/* Wide enough for the longest full type name (Fighting / Electric). */
+.species-coverage-list > div,
+.typecalc-coverage-list > div { width: 5em; }
+
+/* Sub-tab switch (Moves / Evo / Misc / Sets) */
+.species-switch { gap: var(--sp-1); padding: var(--sp-1) 0; flex-wrap: wrap; justify-content: center; }
+.species-switch > * {
+  margin-right: 0 !important;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.species-switch > .sel-active { background: var(--accent); color: #06241c; }
+
+.species-sub-pannel { font-size: var(--fs-sm) !important; }
+.species-moves-title {
+  font-size: var(--fs-xs) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  opacity: 0.85;
+  padding: var(--sp-1) 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.species-move-row { min-height: 26px; padding: 2px 6px; }
+.species-bot, .species-sub-pannel { overflow-x: hidden; }
+.species-move-pwr { font-size: var(--fs-2xs); }
+.species-coverage-list { font-size: var(--fs-xs) !important; }
+#species-desc { font-size: var(--fs-sm); line-height: 1.45; border-radius: var(--radius-sm); }
+
+/* -------- Abilities / Moves / Trainers / Type calc — unify text sizes -------- */
+.abi-row,
+.typecalc-row,
+.typecalc-abi-info { font-size: var(--fs-sm) !important; }
+.abi-name, .typecalc-abi-name { width: 8.5em; min-width: 8.5em; font-weight: 600; }
+.abi-desc { line-height: 1.45; }
+#moves-pwr { font-size: 2.4em !important; }
+.move-overlay-fill { font-size: 2em !important; }
+.move-overlay-effects { font-size: var(--fs-xs) !important; line-height: 1.4; }
+.typecalc-info-row,
+.typecalc-dmg-mod,
+.typecalc-coverage-list { font-size: var(--fs-sm) !important; }
+.typecalc-coverage-mul { font-size: var(--fs-sm) !important; }
+@media (orientation: portrait) {
+  .typecalc-coverage-list,
+  .typecalc-coverage-mul { font-size: var(--fs-md) !important; }
+}
+
+/* -------- Locations -------- */
+.location-title { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; }
+.location-row { font-size: var(--fs-sm); }
+
+/* ---------------------------------------------------------- OVERLAYS */
+/* Settings / filter modals: readable, modern, consistent. */
+#settings-frame {
+  font-size: var(--fs-base);
+  border: 1px solid var(--selActive);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  padding: var(--sp-3);
+  width: min(560px, 92vw);
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 2px;
+}
+#settings-frame h1, #settings-frame h2 { font-size: var(--fs-lg); }
+.settings-row { font-size: var(--fs-base); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.settings-row > * { margin-right: 0 !important; }
+.settings-row button,
+#settings-frame button {
+  font-size: var(--fs-sm);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--btnNActive);
+  color: var(--font-color);
+  border: 1px solid var(--selActive);
+  cursor: pointer;
+}
+.settings-row button:hover,
+#settings-frame button:hover { background: var(--selHover); }
+.settings-row > input[type='radio'] { transform: scale(1.4) !important; }
+.thanks { font-size: var(--fs-xs); opacity: 0.8; line-height: 1.4; }
+
+#filter-help { font-size: var(--fs-sm) !important; line-height: 1.45; }
+.filter-help-title { font-size: var(--fs-lg) !important; }
+.filter-key, .filter-search { font-size: var(--fs-sm) !important; }
+.filter-title { font-size: var(--fs-md); padding: var(--sp-1) 0; }
+
+/* ----------------------------------------------------------- GENERIC */
+.btn, .sel-active, .sel-n-active { border-radius: var(--radius-sm); }
+input[type='radio'] { width: 1.05em; height: 1.05em; }
+
+/* Window/tooltip popovers */
+.window-frame, .tooltip { font-size: var(--fs-sm); border-radius: var(--radius); }
+
+/* Smooth the hover-border layout jolt on interactible hints. */
+.interactible:hover, .filter-interactible:hover { border-width: 2px !important; }

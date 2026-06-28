@@ -347,7 +347,7 @@ function renderResult(coverage, baseTypes, addedTypes, abilityEffects, dmgMods) 
         const typeList = e("div", "typecalc-coverage-list");
         for (const type of coverage[mult]) {
             const colorDiv = e("div", `${type.toLowerCase()} type`);
-            colorDiv.append(e("span", "span-align", type.substr(0, 5)));
+            colorDiv.append(e("span", "span-align", type));
             typeList.append(colorDiv);
         }
         row.append(typeList);
