@@ -191,31 +191,76 @@ aside { gap: 2px; background: var(--colorB); }
   .data-list { min-height: 64px; max-height: 64px; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
 }
 
-/* -------- Species panel -------- */
-.species-top { gap: var(--sp-2); padding: var(--sp-2); align-items: stretch; min-width: 0; width: 100%; box-sizing: border-box; }
-.species-top > * { min-width: 0; }
-#species-basestats, #species-coverage { min-width: 0; }
+/* ===================== SPECIES DETAIL — REBUILT LAYOUT =====================
+   Reading order is now: identity hero → stats + abilities cards → tabs →
+   tab content. On wide detail panes the stats/abilities sit side-by-side. */
+#species-data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Hero: sprite + name/id/types */
+.sp-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  background: var(--colorB);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+}
+#species-front.sp-hero-sprite {
+  width: 104px !important;
+  height: 104px !important;
+  min-width: 104px;
+  min-height: 104px;
+  flex: none;
+  margin: 0;
+  object-fit: contain;
+  cursor: pointer;
+  border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 62%,
+              color-mix(in srgb, var(--accent) 16%, transparent), transparent 68%);
+}
+.sp-hero-id { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+/* Overview cards */
+.sp-overview { display: grid; grid-template-columns: 1fr; gap: var(--sp-3); }
+@media (min-width: 680px) {
+  .sp-overview { grid-template-columns: 1.05fr 1fr; align-items: stretch; }
+}
+.sp-card-abilities { align-items: center; justify-content: center; }
+.sp-card {
+  background: var(--colorB);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+  min-width: 0;
+}
+.sp-card-stats #species-basestats { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sp-card-stats #species-coverage { margin-top: var(--sp-2); }
+.sp-card-abilities { display: flex; gap: var(--sp-3); }
+.sp-card-abilities .species-abi-inn { flex: 1; max-width: none; min-width: 0; align-items: stretch; }
+.sp-card-abilities .species-abi-inn .abi-inn-info { align-self: center; }
 .stat-row { min-width: 0; }
 .stat-bar { min-width: 16px; }
 .stat-num { flex: none; }
-/* Name / id / types row: never let the type badges clip off-screen. */
-.species-mid-stats {
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-1) var(--sp-2);
+
+/* Tab content panel */
+#species-bot {
+  background: var(--colorC);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-/* On phones, drop the stat block to its own full-width row so the bars
-   (and their value badges) always have room instead of overflowing. */
-@media (orientation: portrait) {
-  .species-top { flex-wrap: wrap; }
-  #species-basestats, #species-coverage { flex-basis: 100%; }
-  /* sprite keeps its size; the two ability columns share the rest and wrap */
-  .species-abi-inn { max-width: none; flex: 1 1 0; min-width: 0; }
-  #species-front { height: 116px; width: 116px; flex: none; }
-  .stat-name { width: 2.8em; }
-  .stat-bar { height: 11px; }
-}
+#species-bot > .species-sub-pannel { min-height: 0; }
+@media (orientation: landscape) { #species-bot { flex: 1 1 auto; min-height: 360px; } }
 .species-move-pwr { min-width: 2.2em; padding-right: 2px; }
 .abi-inn-info {
   font-size: var(--fs-2xs);
@@ -369,3 +414,83 @@ input[type='radio'] { width: 1.05em; height: 1.05em; }
 
 /* Smooth the hover-border layout jolt on interactible hints. */
 .interactible:hover, .filter-interactible:hover { border-width: 2px !important; }
+
+/* ===================== APP SHELL & MASTER LIST (REBUILD) ===================== */
+
+/* Brand mark in the header title */
+.main-title::before {
+  content: "";
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.45em;
+  vertical-align: -0.22em;
+  background: url(../icons/favicon.svg) center / contain no-repeat;
+}
+
+/* Master list — a clean, scannable Pokédex list */
+.data-list { background: var(--colorB); }
+.data-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--font-color);
+}
+.species-list-sprite { width: 40px; height: 40px; flex: none; object-fit: contain; image-rendering: pixelated; }
+.species-name { font-weight: 600; min-width: 0; }
+.data-list-row.sel-active {
+  background: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+@media (orientation: landscape) {
+  .data-list { width: 11em; min-width: 11em; }
+  .data-list-row { flex-wrap: nowrap; justify-content: flex-start; text-align: left; }
+}
+@media (orientation: portrait) {
+  /* horizontal strip: keep sprite-over-name, but a touch taller for tap room */
+  .data-list { min-height: 72px; max-height: 72px; }
+  .species-list-sprite { width: 34px; height: 34px; }
+  .data-list-row { flex-direction: column; gap: 0; }
+}
+
+/* Generic content panels (moves / locations / trainers / builder) get the same
+   breathing room and card-like surfaces as the species detail. */
+#moves-data, #locations-data, #trainers-data, #builder-data {
+  padding: var(--sp-3);
+  box-sizing: border-box;
+  gap: var(--sp-3);
+}
+.moves-top, .moves-bot,
+.location-field,
+#trainers-infobar, #trainers-infobar2, #trainers-team {
+  border-radius: var(--radius);
+}
+.moves-top { padding: var(--sp-2); }
+.location-field { background: var(--colorB); border: 1px solid var(--hairline); padding: var(--sp-2); }
+#trainers-infobar, #trainers-infobar2 {
+  background: var(--colorB);
+  border: 1px solid var(--hairline);
+  padding: var(--sp-2) var(--sp-3);
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+#trainers-name { font-size: var(--fs-lg); font-weight: 700; }
+.trainers-pokemon {
+  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
+  background: var(--colorB);
+}
+
+/* Type-calc input rows as a tidy card */
+.typecalc-controls {
+  background: var(--colorB);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: var(--sp-3) var(--sp-3) 0;
+}
+.tc-dropdown-btn { border-radius: var(--radius-sm); }
+
+/* Loading/error screen niceties */
+#loading, #debug { border-radius: var(--radius); }

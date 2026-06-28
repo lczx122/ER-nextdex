@@ -55,7 +55,7 @@
     </script>
     <div id="top-header" class="header-gradient-ER">
         <span class="main-title">
-            Elite Redux Nextdex
+            ER NextDex
         </span>
         <div style="display: flex;">
             <img id="filter-icon" src="./icons/filter.png" alt="">
@@ -81,67 +81,10 @@
                 <div id="species-list" class="data-list">
                 </div>
                 <div id="species-data" class="data-data">
-                    <div class="species-top">
-                        <img id="species-front" class="interactible">
-                        <div class="species-abi-inn">
-                            <div class="abi-inn-info">
-                                Abilities
-                            </div>
-                            <div id="species-abilities">
-
-                            </div>
-                        </div>
-                        <div class="species-abi-inn">
-                            <div class="abi-inn-info">
-                                Innates
-                            </div>
-                            <div id="species-innates">
-
-                            </div>
-                        </div>
-                        <div id="species-basestats" class="interactible">
-                            <div id="BHP" class="stat-row">
-                                <span class="stat-name">HP</span>
-                                <span class="stat-num">0</span>
-                                <div id="BHPBar" class="stat-bar"></div>
-                            </div>
-                            <div id="BAT" class="stat-row">
-                                <span class="stat-name">Atk</span>
-                                <span class="stat-num">0</span>
-                                <div id="BATBar" class="stat-bar"></div>
-                            </div>
-                            <div id="BDF" class="stat-row">
-                                <span class="stat-name">Def</span>
-                                <span class="stat-num">0</span>
-                                <div id="BDFBar" class="stat-bar"></div>
-                            </div>
-                            <div id="BSA" class="stat-row">
-                                <span class="stat-name">SpA</span>
-                                <span class="stat-num">0</span>
-                                <div id="BSABar" class="stat-bar"></div>
-                            </div>
-                            <div id="BSD" class="stat-row">
-                                <span class="stat-name">SpD</span>
-                                <span class="stat-num">0</span>
-                                <div id="BSDBar" class="stat-bar"></div>
-                            </div>
-                            <div id="BSP" class="stat-row">
-                                <span class="stat-name">Spe</span>
-                                <span class="stat-num">0</span>
-                                <div id="BSPBar" class="stat-bar"></div>
-                            </div>
-                            <div id="BST" class="stat-row">
-                                <span class="stat-name">BST</span>
-                                <span class="stat-num">0</span>
-                                <div id="BSTBar" class="stat-bar"></div>
-                            </div>
-                        </div>
-                        <div id="species-coverage" class="interactible" style="display: none;">
-
-                        </div>
-                    </div>
-                    <div class="species-mid">
-                        <div class="species-mid-stats">
+                    <!-- Identity hero: sprite + name/id + type pills -->
+                    <header class="sp-hero">
+                        <img id="species-front" class="interactible sp-hero-sprite">
+                        <div class="sp-hero-id">
                             <div id="species-name"></div>
                             <div id="species-id"></div>
                             <div id="species-types">
@@ -150,12 +93,76 @@
                                 <div class="type filter-interactible"><span></span></div>
                             </div>
                         </div>
-                        <div class="species-switch">
-                            <div id="switch-moves" class="btn sel-active">Moves</div>
-                            <div id="switch-evos-locs" class="btn sel-n-active">Evo & Loca</div>
-                            <div id="switch-misc" class="btn sel-n-active">Misc</div>
-                            <div id="switch-sets" class="btn sel-n-active">Sets</div>
-                        </div>
+                    </header>
+                    <!-- Overview: stats + abilities cards (2-up on wide screens) -->
+                    <div class="sp-overview">
+                        <section class="sp-card sp-card-stats">
+                            <div id="species-basestats" class="interactible">
+                                <div id="BHP" class="stat-row">
+                                    <span class="stat-name">HP</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BHPBar" class="stat-bar"></div>
+                                </div>
+                                <div id="BAT" class="stat-row">
+                                    <span class="stat-name">Atk</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BATBar" class="stat-bar"></div>
+                                </div>
+                                <div id="BDF" class="stat-row">
+                                    <span class="stat-name">Def</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BDFBar" class="stat-bar"></div>
+                                </div>
+                                <div id="BSA" class="stat-row">
+                                    <span class="stat-name">SpA</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BSABar" class="stat-bar"></div>
+                                </div>
+                                <div id="BSD" class="stat-row">
+                                    <span class="stat-name">SpD</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BSDBar" class="stat-bar"></div>
+                                </div>
+                                <div id="BSP" class="stat-row">
+                                    <span class="stat-name">Spe</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BSPBar" class="stat-bar"></div>
+                                </div>
+                                <div id="BST" class="stat-row">
+                                    <span class="stat-name">BST</span>
+                                    <span class="stat-num">0</span>
+                                    <div id="BSTBar" class="stat-bar"></div>
+                                </div>
+                            </div>
+                            <div id="species-coverage" class="interactible" style="display: none;">
+
+                            </div>
+                        </section>
+                        <section class="sp-card sp-card-abilities">
+                            <div class="species-abi-inn">
+                                <div class="abi-inn-info">
+                                    Abilities
+                                </div>
+                                <div id="species-abilities">
+
+                                </div>
+                            </div>
+                            <div class="species-abi-inn">
+                                <div class="abi-inn-info">
+                                    Innates
+                                </div>
+                                <div id="species-innates">
+
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <!-- Segmented tabs for the detail sections -->
+                    <div class="species-switch">
+                        <div id="switch-moves" class="btn sel-active">Moves</div>
+                        <div id="switch-evos-locs" class="btn sel-n-active">Evo &amp; Loca</div>
+                        <div id="switch-misc" class="btn sel-n-active">Misc</div>
+                        <div id="switch-sets" class="btn sel-n-active">Sets</div>
                     </div>
                     <div id="species-bot" class="species-bot">
                         <div id="species-moves" class="species-sub-pannel active-sub-panel">
