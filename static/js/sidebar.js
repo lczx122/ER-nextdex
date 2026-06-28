@@ -6,7 +6,7 @@ import { getHintInteractibilityClass } from "./settings.js"
 export function setupPanels() {
     // if modified sync it with "search.js > search > panelUpdatesTable" variable
     const panelTable = [
-        ["#btn-species", "#panel-species", "#species-data", "#builder-data"],
+        ["#btn-species", "#panel-species"], // team builder removed (no second view)
         ["#btn-abis", "#panel-abis", "#abis-list", "#typecalc-data"],
         ["#btn-moves", "#panel-moves"],
         ["#btn-locations", "#panel-locations"],

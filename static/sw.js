@@ -11,7 +11,7 @@
  *
  * Bump CACHE_VERSION whenever the precache list or strategy changes.
  */
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const SHELL_CACHE = `erdex-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `erdex-runtime-${CACHE_VERSION}`;
 const DATA_CACHE = `erdex-data-${CACHE_VERSION}`;
@@ -38,6 +38,7 @@ const PRECACHE_URLS = [
   './js/index.js',
   './js/settings.js',
   './js/pwa.js',
+  './font/Inter.woff2',
   './icons/favicon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',

@@ -136,7 +136,8 @@ function setPartyPanel(party) {
         }
         frag.append(pokeDiv)
     }
-    $('#trainers-team').empty().append(frag).append(getNodeRedirectToEditorPokemon(party))
+    // Team builder removed: no "Edit in builder" entry point.
+    $('#trainers-team').empty().append(frag)
 }
 
 

@@ -162,6 +162,40 @@ export function setAllMoves(specie = gameData.species[currentSpecieID]){
     } else {
         $('#eggpreevo-title').show()
     }
+    refreshMoveCategories()
+}
+
+// ---- Move-category toggle: show one of Level-up / TM-HM / Tutor / Egg at a
+// time instead of one long scroll. ----
+const MOVE_CATS = [
+    { key: 'learnset', row: '#learnset-title',  lists: ['#learnset'] },
+    { key: 'tmhm',     row: '#tmhm-title',      lists: ['#tmhm'] },
+    { key: 'tutor',    row: '#tutor-title',     lists: ['#tutor'] },
+    { key: 'egg',      row: '#eggpreevo-title', lists: ['#eggmoves', '#preevomoves'] },
+]
+let currentMoveCat = 'learnset'
+
+function catHasMoves(cat) {
+    return cat.lists.some((sel) => $(sel).children().length > 0)
+}
+function showMoveCategory(key) {
+    const available = MOVE_CATS.filter(catHasMoves)
+    const target = MOVE_CATS.find((c) => c.key === key && catHasMoves(c)) || available[0]
+    MOVE_CATS.forEach((c) => { (target && c === target) ? $(c.row).show() : $(c.row).hide() })
+    if (target) currentMoveCat = target.key
+    $('#mv-cat-toggle .mv-cat-btn').each(function () {
+        const cat = MOVE_CATS.find((c) => c.key === this.dataset.cat)
+        this.classList.toggle('mv-cat-hidden', !(cat && catHasMoves(cat)))
+        this.classList.toggle('mv-cat-active', !!target && this.dataset.cat === target.key)
+    })
+}
+function refreshMoveCategories() {
+    showMoveCategory(currentMoveCat)
+}
+function setupMoveCategoryToggle() {
+    $('#mv-cat-toggle .mv-cat-btn').on('click', function () {
+        showMoveCategory(this.dataset.cat)
+    })
 }
 
 function filterMoves(moveIDlist) {
@@ -397,6 +431,7 @@ export function setupSpeciesPanel() {
         freedom = !freedom
         setSpecieHeightWeight()
     })
+    setupMoveCategoryToggle()
 }
 function toLowerButFirstCase(word) {
     word = word.toLowerCase()

@@ -166,6 +166,12 @@
                     </div>
                     <div id="species-bot" class="species-bot">
                         <div id="species-moves" class="species-sub-pannel active-sub-panel">
+                            <div class="mv-cat-toggle" id="mv-cat-toggle">
+                                <div class="mv-cat-btn mv-cat-active" data-cat="learnset">Level-up</div>
+                                <div class="mv-cat-btn" data-cat="tmhm">TM / HM</div>
+                                <div class="mv-cat-btn" data-cat="tutor">Tutor</div>
+                                <div class="mv-cat-btn" data-cat="egg">Egg</div>
+                            </div>
                             <div class="species-bot-row" id="learnset-title">
                                 <div class="species-moves-title">
                                     Learn Sets
@@ -421,7 +427,6 @@
         <aside>
             <div class="side-btn btn-active interactible" id="btn-species">
                 <span class="big-select interactible">Species</span>
-                <span class="small-select interactible">Builder</span>
             </div>
             <div class="side-btn btn-n-active interactible" id="btn-abis">
                 <span class="big-select interactible">Abilities</span>
@@ -514,9 +519,6 @@
                 <option value="none">None</option>
                 <option value="Vanilla">Vanilla</option>
             </select>
-        </div>
-        <div class="settings-row">
-            <button id="open-team-savefile">Import Team from savefile</button>
         </div>
         <div class="settings-row">
             <button id="import-comsets">Import community sets from file</button>

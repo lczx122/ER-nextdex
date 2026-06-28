@@ -6,6 +6,15 @@
    (move rows, ability lists, trainers, filters…) is themed automatically.
    ========================================================================= */
 
+/* Inter — modern, highly readable UI font (self-hosted variable woff2). */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../font/Inter.woff2') format('woff2');
+}
+
 /* ----------------------------------------------------------------- TOKENS */
 :root {
   /* Type scale — fixed rem so text is identical on phone and desktop */
@@ -185,8 +194,15 @@ aside { gap: 2px; background: var(--surface); }
   .btn-active::after { left: 0; top: 14%; bottom: 14%; width: 3px; border-radius: 3px; }
 }
 @media (orientation: portrait) {
-  aside { min-height: auto; padding: 2px 0 var(--safe-bottom, 0px); border-top: 1px solid var(--hairline); }
-  .side-btn { flex: 1; }
+  /* Fixed-height bottom bar so it never changes size between pages. */
+  aside {
+    height: 56px; min-height: 56px; box-sizing: content-box;
+    padding: 0 0 var(--safe-bottom, 0px); border-top: 1px solid var(--hairline);
+  }
+  .side-btn {
+    flex: 1 1 0; min-width: 0; height: 100%; padding: 0 4px; gap: 1px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
   .btn-active::after { left: 20%; right: 20%; top: 0; height: 3px; border-radius: 3px; }
 }
 
@@ -333,8 +349,25 @@ aside { gap: 2px; background: var(--surface); }
 .species-move-pwr { min-width: 2.6em; flex: none; text-align: right; padding-right: 4px; font-size: var(--fs-2xs); }
 .species-move-list { padding-right: 6px; }
 .species-move-sprite { flex: none; }
-/* Move columns: 1 on phones (readable), more as width allows. */
-.species-sub-pannel > .species-bot-row { min-width: 280px; }
+/* Moves are now shown one category at a time via a toggle (single column). */
+#species-moves { flex-direction: column; flex-wrap: nowrap; }
+.mv-cat-toggle {
+  display: flex; gap: var(--sp-1); padding: var(--sp-2); flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 2; background: var(--surface); border-bottom: 1px solid var(--hairline);
+}
+.mv-cat-btn {
+  flex: 1 1 auto; min-width: 0; text-align: center; cursor: pointer; padding: 8px 10px;
+  border-radius: 999px; font-size: var(--fs-sm); font-weight: 700; color: var(--muted);
+  background: var(--btnNActive); white-space: nowrap;
+}
+.mv-cat-btn:hover { background: var(--btnHover); }
+.mv-cat-btn.mv-cat-active { background: linear-gradient(135deg, var(--t1), var(--t2)); color: #fff; }
+.mv-cat-btn.mv-cat-hidden { display: none !important; }
+/* The toggle already names the category — hide the redundant inner titles
+   (but keep the Egg / Pre-evo distinction). */
+#learnset-title > .species-moves-title,
+#tmhm-title > .species-moves-title,
+#tutor-title > .species-moves-title { display: none; }
 #learnset, #tmhm, #eggmoves, #preevomoves { background: transparent; }
 #species-desc { font-size: var(--fs-sm); line-height: 1.5; border-radius: var(--radius-sm); background: var(--colorC); }
 
