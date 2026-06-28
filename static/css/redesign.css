@@ -65,8 +65,45 @@
   --icon-filter: brightness(0) invert(1) opacity(.82);
 }
 
-html { font-size: 16px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; height: 100%; }
 body { font-size: var(--fs-base); line-height: 1.4; letter-spacing: .1px; }
+
+/* ===================== APP SHELL ARCHITECTURE =====================
+   Lock the app to the visual viewport so the nav is always pinned and only
+   the content area scrolls. 100dvh tracks mobile browser toolbars; nothing
+   below the content can be pushed off-screen. */
+body {
+  height: 100vh;            /* fallback */
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+#top-header, .search-wrapper { flex: 0 0 auto; }
+#non-header { flex: 1 1 auto; min-height: 0; min-width: 0; overflow: hidden; }
+main { min-height: 0; min-width: 0; overflow: hidden; }
+.panel { min-height: 0; min-width: 0; }
+/* The per-panel content column is the ONLY thing that scrolls. */
+.data-data { overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+@media (orientation: portrait) {
+  #non-header { flex-direction: column; }
+  main { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  /* Bottom navigation bar — pinned, never scrolls away. */
+  aside {
+    position: static;
+    bottom: auto;
+    flex: 0 0 auto;
+    overflow: visible;
+    z-index: 6;
+    box-shadow: 0 -2px 12px var(--shadow);
+  }
+}
+@media (orientation: landscape) {
+  #non-header { flex-direction: row; }
+  aside { flex: 0 0 auto; overflow-y: auto; }
+}
 
 /* ----------------------------------------------------------------- HEADER */
 #top-header {
@@ -161,7 +198,7 @@ aside { gap: 2px; background: var(--surface); }
   font-size: var(--fs-sm); border-radius: var(--radius-xs); color: var(--font-color);
 }
 .species-list-sprite { width: 40px; height: 40px; flex: none; object-fit: contain; image-rendering: pixelated; }
-.species-name { font-weight: 600; min-width: 0; }
+.species-name { font-weight: 600; width: auto !important; white-space: nowrap; }
 .data-list-row.sel-active {
   background: var(--interactible) !important;
   box-shadow: inset 3px 0 0 var(--accent);
@@ -172,9 +209,10 @@ aside { gap: 2px; background: var(--surface); }
   .data-list-row:hover { background: var(--selHover); }
 }
 @media (orientation: portrait) {
-  .data-list { min-height: 74px; max-height: 74px; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
+  .data-list { min-height: 78px; max-height: 78px; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
   .species-list-sprite { width: 34px; height: 34px; }
-  .data-list-row { flex-direction: column; gap: 0; padding: 4px 8px; }
+  /* each chip sizes to its content (full name) and the strip scrolls */
+  .data-list-row { flex-direction: column; gap: 0; padding: 4px 10px; flex: 0 0 auto; align-items: center; text-align: center; }
 }
 
 /* ============================ SPECIES DETAIL ============================= */
@@ -285,10 +323,17 @@ aside { gap: 2px; background: var(--surface); }
   font-weight: 800; color: var(--muted); padding: var(--sp-2) 0; position: sticky; top: 0; z-index: 1;
   background: var(--surface);
 }
-.species-move-row { min-height: 30px; padding: 3px 10px; }
+.species-move-row { min-height: 30px; padding: 3px 8px; gap: 5px; align-items: center; }
 .species-move-row:not(:last-child) { border-bottom: 1px solid var(--hairline); }
 .species-bot, .species-sub-pannel { overflow-x: hidden; }
-.species-move-pwr { min-width: 2.2em; padding-right: 2px; font-size: var(--fs-2xs); }
+/* Let the move NAME flex/ellipsis so the power value can never be pushed
+   off the right edge. */
+.species-move-name { width: auto !important; flex: 1 1 auto; min-width: 0; text-align: left; }
+.species-move-pwr { min-width: 2.6em; flex: none; text-align: right; padding-right: 4px; font-size: var(--fs-2xs); }
+.species-move-list { padding-right: 6px; }
+.species-move-sprite { flex: none; }
+/* Move columns: 1 on phones (readable), more as width allows. */
+.species-sub-pannel > .species-bot-row { min-width: 280px; }
 #learnset, #tmhm, #eggmoves, #preevomoves { background: transparent; }
 #species-desc { font-size: var(--fs-sm); line-height: 1.5; border-radius: var(--radius-sm); background: var(--colorC); }
 
@@ -321,17 +366,27 @@ aside { gap: 2px; background: var(--surface); }
 .trainers-pokemon { border-radius: var(--radius); border: 1px solid var(--hairline); background: var(--surface); }
 .typecalc-controls {
   background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
-  overflow: hidden; margin: var(--sp-3) var(--sp-3) 0;
+  overflow: hidden; margin: var(--sp-3) var(--sp-3) 0; box-sizing: border-box; max-width: calc(100% - 2 * var(--sp-3));
 }
 .typecalc-row, .typecalc-info-row, .typecalc-dmg-mod, .typecalc-coverage-list, .typecalc-coverage-mul { font-size: var(--fs-sm) !important; }
-.tc-dropdown-btn { border-radius: var(--radius-xs); background: var(--btnNActive); color: var(--font-color); }
+/* Keep the two type/ability dropdowns inside the viewport on phones. */
+.typecalc-row { box-sizing: border-box; min-width: 0; }
+.typecalc-row-content { min-width: 0; }
+.tc-dropdown-wrap { min-width: 0 !important; }
+.tc-dropdown-btn { border-radius: var(--radius-xs); background: var(--btnNActive); color: var(--font-color); box-sizing: border-box; width: 100%; min-width: 0; }
 @media (orientation: portrait) { .typecalc-coverage-list, .typecalc-coverage-mul { font-size: var(--fs-md) !important; } }
 
 /* ----------------------------------------------------------------- OVERLAYS */
 #settings-frame {
-  font-size: var(--fs-base); background: var(--surface); border: 1px solid var(--hairline);
+  font-size: var(--fs-base); background: var(--surface) !important; border: 1px solid var(--hairline);
   border-radius: var(--radius); box-shadow: 0 18px 50px var(--shadow); padding: var(--sp-4);
-  width: min(560px, 92vw); left: 50%; transform: translateX(-50%); gap: 2px; color: var(--font-color);
+  gap: 2px; color: var(--font-color);
+  box-sizing: border-box;
+  /* Bounded, centered sheet that always fits between the header and nav. */
+  left: 50% !important; transform: translateX(-50%) !important;
+  width: min(560px, calc(100vw - 2 * var(--sp-3))) !important;
+  top: 64px !important; height: auto !important; bottom: auto !important;
+  max-height: calc(100dvh - 132px); overflow-y: auto;
 }
 .settings-row { font-size: var(--fs-base); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .settings-row > * { margin-right: 0 !important; }
