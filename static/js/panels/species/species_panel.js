@@ -588,68 +588,84 @@ function setLocations(locations, SEnc) {
 }
 
 export function setupReorderBtn() {
-    const row = e('div', 'data-list-row', 'reorder')
-    function byAlpha(a, b) {
-        return a.name.localeCompare(b.name)
-    }
-    function localeByStats(statID, a, b) {
-        return a.stats.base[statID] - b.stats.base[statID]
-    }
     const list = $('#species-list')
-    const sortOrderStats = (ev, statsID) => {
-        createInformationWindow(cubicRadial([
-            ["STRONGER First >", (ev) => {
-                reorderNodeList(list, localeByStats.bind(null, statsID), ">")
-                removeInformationWindow(ev)
-            }],
-            ["weaker first <", (ev) => {
-                reorderNodeList(list, localeByStats.bind(null, statsID), "<")
-                removeInformationWindow(ev)
-            }],
-            undefined, undefined // if you don't make it a square it won't work
-        ], "8em", "1em"), ev, "mid", true, true)
-    }
-    row.onclick = (ev) => {
-        createInformationWindow(cubicRadial([
-            ["Default", (ev) => {
-                reorderNodeList(list)
-                removeInformationWindow(ev)
+    const byAlpha = (a, b) => a.name.localeCompare(b.name)
+    const byStat = (statID, a, b) => a.stats.base[statID] - b.stats.base[statID]
 
-            }],
-            ["A-Z", (ev) => {
-                reorderNodeList(list, byAlpha)
-                removeInformationWindow(ev)
-            }],
-            ["Stats", () => {
-                createInformationWindow(cubicRadial([
-                    ["HP", (ev) => {
-                        sortOrderStats(ev, 0)
-                    }],
-                    ["Atk", (ev) => {
-                        sortOrderStats(ev, 1)
-                    }],
-                    ["Def", (ev) => {
-                        sortOrderStats(ev, 2)
-                    }],
-                    ["SpA", (ev) => {
-                        sortOrderStats(ev, 3)
-                    }],
-                    ["SpD", (ev) => {
-                        sortOrderStats(ev, 4)
-                    }],
-                    ["Spe", (ev) => {
-                        sortOrderStats(ev, 5)
-                    }],
-                    ["BST", (ev) => {
-                        sortOrderStats(ev, 6)
-                    }],
-                    undefined // if you don't make it a square it won't work
-                ], "4em", "1em"), ev, "mid", true, false)
-            }],
-        ], "6em", "1em"), ev, "mid", true, false)
+    // Stats sort high→low by default (what people usually want).
+    let descending = true
+
+    // ---- The "Sort" pill button ----
+    const btn = e('div', 'sort-btn')
+    btn.append(e('span', 'sort-btn-icon', '↕'), e('span', 'sort-btn-label', 'Sort'))
+
+    // ---- Dropdown menu (appended to <body> so the list's overflow doesn't
+    // clip it; positioned under the button on open) ----
+    const menu = e('div', 'sort-menu hidden')
+    const dirBtn = e('div', 'sort-dir', 'High → Low')
+    const head = e('div', 'sort-menu-head')
+    head.append(e('span', 'sort-menu-title', 'Sort by'), dirBtn)
+    menu.append(head)
+
+    let activeOpt = null
+    const setActive = (opt) => {
+        if (activeOpt) activeOpt.classList.remove('sort-opt-active')
+        activeOpt = opt
+        opt.classList.add('sort-opt-active')
+    }
+    const addOpt = (label, fn, statId) => {
+        const opt = e('div', 'sort-opt', label)
+        if (statId !== undefined) opt.dataset.stat = statId
+        opt.onclick = (ev) => {
+            ev.stopPropagation()
+            fn()
+            setActive(opt)
+            closeMenu()
+        }
+        menu.append(opt)
+        return opt
     }
 
-    return row
+    const defaultOpt = addOpt('Dex order', () => reorderNodeList(list))
+    addOpt('Name (A–Z)', () => reorderNodeList(list, byAlpha))
+    const STATS = [['HP', 0], ['Attack', 1], ['Defense', 2], ['Sp. Atk', 3], ['Sp. Def', 4], ['Speed', 5], ['Total (BST)', 6]]
+    for (const [label, id] of STATS) {
+        addOpt(label, () => reorderNodeList(list, byStat.bind(null, id), descending ? '>' : '<'), id)
+    }
+    setActive(defaultOpt)
+
+    dirBtn.onclick = (ev) => {
+        ev.stopPropagation()
+        descending = !descending
+        dirBtn.innerText = descending ? 'High → Low' : 'Low → High'
+        // re-apply immediately if a stat sort is active
+        if (activeOpt && activeOpt.dataset.stat !== undefined) {
+            reorderNodeList(list, byStat.bind(null, +activeOpt.dataset.stat), descending ? '>' : '<')
+        }
+    }
+
+    document.body.appendChild(menu)
+    function closeMenu() { menu.classList.add('hidden') }
+    function openMenu() {
+        const r = btn.getBoundingClientRect()
+        menu.classList.remove('hidden')
+        const mw = menu.offsetWidth || 200
+        let left = r.left
+        if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8
+        menu.style.left = Math.max(8, left) + 'px'
+        // open below; flip above if it would overflow the bottom
+        const mh = menu.offsetHeight || 300
+        menu.style.top = (r.bottom + 6 + mh > window.innerHeight ? Math.max(8, r.top - 6 - mh) : r.bottom + 6) + 'px'
+    }
+    btn.onclick = (ev) => {
+        ev.stopPropagation()
+        menu.classList.contains('hidden') ? openMenu() : closeMenu()
+    }
+    document.addEventListener('click', (ev) => {
+        if (!menu.contains(ev.target) && ev.target !== btn) closeMenu()
+    })
+
+    return btn
 }
 
 function buildResist(specie){
