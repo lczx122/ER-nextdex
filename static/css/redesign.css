@@ -376,6 +376,36 @@ aside { gap: 2px; background: var(--surface); }
 #learnset-title > .species-moves-title,
 #tmhm-title > .species-moves-title,
 #tutor-title > .species-moves-title { display: none; }
+
+/* Inline move detail (accordion) — replaces the old floating overlay popup */
+.species-move-row.move-selected { background: var(--interactible) !important; }
+.sp-move-detail {
+  background: var(--colorC); border: 1px solid var(--hairline); border-radius: var(--radius-sm);
+  margin: var(--sp-1) var(--sp-2); padding: var(--sp-2) var(--sp-3);
+}
+.sp-move-detail .move-overlay {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3);
+  margin: 0 !important; background: transparent !important; text-align: left;
+}
+.sp-move-detail .move-overlay-power { display: flex; align-items: baseline; gap: var(--sp-2); width: auto; }
+.sp-move-detail .move-overlay-top { font-weight: 800; font-size: var(--fs-md); color: var(--font-color); }
+.sp-move-detail .move-overlay-fill { font-size: var(--fs-xl) !important; font-weight: 800; }
+.sp-move-detail .move-overlay-stats {
+  display: flex; flex-wrap: wrap; gap: 2px var(--sp-3); width: auto; text-align: left; padding: 0;
+  font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.sp-move-detail .move-overlay-other { display: flex; align-items: center; gap: var(--sp-2); }
+.sp-move-detail .move-overlay-types { display: flex; gap: 4px; width: auto; }
+.sp-move-detail .move-overlay-type {
+  border-radius: 999px; padding: 3px 11px; font-size: var(--fs-2xs); font-weight: 800;
+  text-transform: uppercase; letter-spacing: .5px; line-height: 1.4;
+}
+.sp-move-detail .move-overlay-type:empty { display: none; }
+.sp-move-detail .move-overlay-img { width: 38px; height: auto; image-rendering: auto; }
+.sp-move-detail .move-overlay-effects {
+  flex: 1 1 100%; width: auto; text-align: left; padding: 0; overflow: visible;
+  font-size: var(--fs-xs); color: var(--font-color); line-height: 1.45; margin-top: 2px;
+}
 #learnset, #tmhm, #eggmoves, #preevomoves { background: transparent; }
 #species-desc { font-size: var(--fs-sm); line-height: 1.5; border-radius: var(--radius-sm); background: var(--colorC); }
 

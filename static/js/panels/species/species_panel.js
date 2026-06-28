@@ -234,10 +234,24 @@ export function setMovePower(move){
 export function setMoveRow(moveID) {
     const row = document.createElement('div')
     row.className = "species-move-row"
-    row.onclick = function(ev){
+    // Tap a move to expand its details inline (accordion) instead of a floating
+    // overlay. Tap again to collapse; tapping another move moves the panel.
+    row.onclick = function(){
         fastdom.mutate(() => {
-            createInformationWindow(moveOverlay(moveID), ev)
-        });
+            const existing = document.getElementById('species-move-detail')
+            if (row.classList.contains('move-selected')) {
+                row.classList.remove('move-selected')
+                if (existing) existing.remove()
+                return
+            }
+            $('#species-bot .species-move-row.move-selected').removeClass('move-selected')
+            if (existing) existing.remove()
+            const detail = e('div', 'sp-move-detail')
+            detail.id = 'species-move-detail'
+            detail.append(moveOverlay(moveID, false))
+            row.after(detail)
+            row.classList.add('move-selected')
+        })
     }
     return row
 }
@@ -387,7 +401,6 @@ function setAbilities(abilities, specie) {
             }
             const abi = gameData.abilities[abilities[i]]
             const name = e("div", "species-ability " + getHintInteractibilityClass(), abi.name)
-            addTooltip(name, abi.desc)
             name.onclick = () => {
                 $('#species-abilities .sel-active').removeClass('sel-active').addClass('sel-n-active')
                 name.classList.replace('sel-n-active', 'sel-active')
@@ -414,7 +427,6 @@ function setInnates(innates) {
             const inn = gameData.abilities[innates[i]]
             const name = e("div", "species-innate " + getHintInteractibilityClass(), inn.name)
             longClickToFilter(0, name, "ability", () => { return inn.name }, 0)
-            addTooltip(name, inn.desc)
             name.onclick = () => showAbiDesc(inn, name)
             return name
         }).filter(x => x))
