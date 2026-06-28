@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Official Pokémon Elite Redux online pokedex, Find any Species, Ability, Move, Trainer, Encounters for your game version on this interactive application."> 
     <!--Maybe i'd set this iOS fix again and this time it will work-->
     <meta http-equiv="Content-Security-Policy" content="img-src * 'self' data:; default-src * 'self' gap: ; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; ">
@@ -14,8 +14,25 @@
     <link rel="stylesheet" href="./css/themes/rushed.css" id="styles-rushed">
     <link rel="stylesheet" href="./css/themes/blahaj.css" id="styles-blahaj">
     <link rel="stylesheet" href="./css/themes/wood.css" id="styles-wood">
-    <link rel="icon" type="image/x-icon" href="./icons/favicon.webp">
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="./icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#1c4069" id="meta-theme-color">
+    <meta name="color-scheme" content="dark">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ER NextDex">
+    <meta name="application-name" content="ER NextDex">
+
+    <link rel="stylesheet" href="./css/pwa.css">
     <script type="module" src="./js/settings.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
 </head>
 
 <body>

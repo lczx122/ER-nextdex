@@ -100,7 +100,19 @@ function changeTheme(){
     for (const theme of themeList){
         document.getElementById(`styles-${theme}`).disabled = theme !== settingsTheme
     }
-    
+    syncThemeColorMeta()
+}
+
+/**
+ * Keep the browser/PWA UI colour (status bar, task switcher) in sync with the
+ * active theme by reflecting its --background onto <meta name="theme-color">.
+ */
+function syncThemeColorMeta(){
+    const meta = document.getElementById('meta-theme-color')
+    if (!meta) return
+    const bg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--background').trim()
+    if (bg) meta.setAttribute('content', bg)
 }
 function toUpperCaseFirst(word){
     return word.charAt(0).toUpperCase() + word.slice(1)

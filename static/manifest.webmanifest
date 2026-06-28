@@ -1,0 +1,28 @@
+{
+  "name": "Elite Redux NextDex",
+  "short_name": "ER NextDex",
+  "description": "Interactive Pokédex for the Elite Redux ROM hack: search any species, ability, move, trainer and encounter for your game version. Works offline.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#1a2630",
+  "theme_color": "#1c4069",
+  "categories": ["games", "reference", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    { "src": "./icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Species", "short_name": "Species", "url": "./?tab=species", "description": "Browse Pokémon species" },
+    { "name": "Abilities", "short_name": "Abilities", "url": "./?tab=abilities", "description": "Browse abilities" },
+    { "name": "Moves", "short_name": "Moves", "url": "./?tab=moves", "description": "Browse moves" },
+    { "name": "Trainers", "short_name": "Trainers", "url": "./?tab=trainers", "description": "Browse trainers" }
+  ]
+}

@@ -1,0 +1,216 @@
+/*
+ * PWA & UX polish — additive only. Targets specific classes/ids so it never
+ * changes the layout dimensions the JS relies on. Covers: standalone safe-area
+ * insets, tap feedback, focus-visible rings, nicer scrollbars, smoother
+ * scrolling, the install/update/offline toasts, and the loading spinner.
+ */
+
+:root {
+  color-scheme: dark;
+  /* iOS standalone safe-area helpers (0 in a normal browser tab). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Kill the blue tap flash + iOS callout, keep deliberate text selection. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+input, textarea, [contenteditable], span, p, a, .interactible {
+  -webkit-touch-callout: default;
+}
+
+/* Smooth, contained momentum scrolling for the data lists & sub-panels. */
+.data-list,
+.species-bot,
+#species-moves,
+.species-move-list,
+.species-sub-pannel,
+#abis-list,
+#panel-moves,
+#panel-locations,
+#panel-trainers {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Thin, theme-aware scrollbars where content actually scrolls (desktop).
+   The global rule in core.css hides scrollbars app-wide; re-enable slim ones
+   only on the scrollable containers so they stay discoverable on pointer UAs. */
+@media (hover: hover) and (pointer: fine) {
+  .data-list::-webkit-scrollbar,
+  .species-bot::-webkit-scrollbar,
+  #species-moves::-webkit-scrollbar,
+  .species-sub-pannel::-webkit-scrollbar,
+  #abis-list::-webkit-scrollbar,
+  #panel-moves::-webkit-scrollbar,
+  #panel-locations::-webkit-scrollbar,
+  #panel-trainers::-webkit-scrollbar {
+    -webkit-appearance: auto;
+    display: block;
+    width: 8px;
+    height: 8px;
+  }
+  .data-list::-webkit-scrollbar-thumb,
+  .species-bot::-webkit-scrollbar-thumb,
+  #species-moves::-webkit-scrollbar-thumb,
+  .species-sub-pannel::-webkit-scrollbar-thumb,
+  #abis-list::-webkit-scrollbar-thumb,
+  #panel-moves::-webkit-scrollbar-thumb,
+  #panel-locations::-webkit-scrollbar-thumb,
+  #panel-trainers::-webkit-scrollbar-thumb {
+    background: var(--selActive, #5b717b);
+    border-radius: 8px;
+  }
+  .data-list:hover::-webkit-scrollbar-thumb {
+    background: var(--selHover, #5e7077);
+  }
+}
+
+/* Accessible keyboard focus without disturbing mouse/touch users. */
+:focus-visible {
+  outline: 2px solid var(--positive, #1fc990);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+#search-bar:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Tactile press feedback on the interactive bits. */
+.btn,
+.side-btn,
+#search-keys,
+#settings-btn,
+#filter-icon,
+.type {
+  transition: background-color 0.12s ease, transform 0.06s ease, filter 0.12s ease;
+}
+.btn:active,
+.side-btn:active,
+#search-keys:active {
+  transform: scale(0.97);
+  filter: brightness(1.08);
+}
+#settings-btn:active,
+#filter-icon:active {
+  transform: scale(0.9);
+}
+#settings-btn,
+#filter-icon {
+  cursor: pointer;
+}
+
+/* The header title shouldn't be selectable/clumsy on long-press. */
+.main-title {
+  -webkit-user-select: none;
+  user-select: none;
+  letter-spacing: 0.3px;
+}
+
+/* ---- Standalone (installed) safe-area handling ---- */
+@media (display-mode: standalone) {
+  #top-header {
+    padding-top: var(--safe-top);
+    box-sizing: content-box;
+  }
+  @media (orientation: portrait) {
+    aside {
+      padding-bottom: var(--safe-bottom);
+    }
+  }
+  @media (orientation: landscape) {
+    aside {
+      padding-left: var(--safe-left);
+    }
+  }
+}
+
+/* ---- Toasts (install / update / offline) ---- */
+.pwa-toast-host {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(94vw, 460px);
+  pointer-events: none;
+}
+.pwa-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--colorA, #2d3436);
+  color: var(--font-color, #fff);
+  border: 1px solid var(--selActive, #5b717b);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  font-size: 15px;
+  line-height: 1.3;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.pwa-toast-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.pwa-toast-msg {
+  flex: 1;
+  margin: 0;
+  user-select: none;
+}
+.pwa-toast-btn {
+  flex: none;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #06241c;
+  background: var(--positive, #1fc990);
+  transition: filter 0.12s ease, transform 0.06s ease;
+}
+.pwa-toast-btn:hover { filter: brightness(1.08); }
+.pwa-toast-btn:active { transform: scale(0.96); }
+.pwa-toast-close {
+  flex: none;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--font-color, #fff);
+  opacity: 0.7;
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.pwa-toast-close:hover { opacity: 1; }
+
+/* Spinning load icons in the boot/debug list. */
+.loading-icons {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  .pwa-toast {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .btn:active,
+  .side-btn:active,
+  #search-keys:active,
+  #settings-btn:active,
+  #filter-icon:active {
+    transform: none;
+  }
+}
