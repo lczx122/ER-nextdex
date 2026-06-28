@@ -3,7 +3,7 @@ import { loadFont } from "./fonts.js"
 
 const appName = "ERdex"
 const appSettings = appName + "_settings"
-const settingsVersion = "8" //when changed it will init newly added elements from default to the current settings
+const settingsVersion = "9" //when changed it will init newly added elements from default to the current settings
 // and this automatically to prevent some undefined behavior
 const themeList =  [
     "blueish",
@@ -11,6 +11,8 @@ const themeList =  [
     "wood",
     "blahaj",
 ]
+// Light / dark appearance (the new design system). "auto" follows the OS.
+const modeList = ['light', 'dark', 'auto']
 const fontList = [
     'clean',
     'basis33',
@@ -24,6 +26,7 @@ export const settings = {
 const defaultSettings = {
     settingsVersion: settingsVersion,
     theme: "blueish",
+    mode: "light",
     storageEnable: true,
     monotype: false,
     discordFormat: true,
@@ -55,7 +58,31 @@ export function initAppSettings(){
         }
     }
     changeTheme()
+    applyMode(settings.mode)
     loadFont(settings.font)
+}
+
+/**
+ * Apply the light/dark appearance by setting data-theme on <html>. "auto"
+ * resolves to the OS preference and tracks live changes.
+ */
+let _modeMediaBound = false
+export function applyMode(mode){
+    if (modeList.indexOf(mode) === -1) mode = 'light'
+    const resolve = (m) => m === 'auto'
+        ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : m
+    document.documentElement.setAttribute('data-theme', resolve(mode))
+    if (mode === 'auto' && window.matchMedia && !_modeMediaBound){
+        _modeMediaBound = true
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (settings.mode === 'auto'){
+                document.documentElement.setAttribute('data-theme', resolve('auto'))
+                syncThemeColorMeta()
+            }
+        })
+    }
+    syncThemeColorMeta()
 }
 
 export function saveSettings(){
@@ -216,12 +243,11 @@ export function setupSettings(){
         loadFont(font)
     })
     if (settings.discordFormat) $('#enable-export-discord').attr('checked', true)
-    setDynamicalRowOfSettings("theme", themeList, (theme) => {
-        settings.theme = theme
+    setDynamicalRowOfSettings("mode", modeList, (mode) => {
+        settings.mode = mode
         saveSettings()
-        changeTheme()
+        applyMode(mode)
     })
-    
 }
 
 /**

@@ -110,9 +110,29 @@ function setDefensiveCoverage(coverage) {
     core.append(frag)
 }
 
+// Type → accent colour, used to tint the species hero by the mon's typing.
+const TYPE_HEX = {
+    normal: '#9099a1', fire: '#f1762b', water: '#4f90d9', electric: '#f3c93b',
+    grass: '#5dbe62', ice: '#76d0c8', fighting: '#cf4068', poison: '#b061c6',
+    ground: '#d8884a', flying: '#8aa6e6', psychic: '#f56c8a', bug: '#9fc02e',
+    rock: '#c7b36a', ghost: '#6a6dc0', dragon: '#7d62e0', dark: '#5b5366',
+    steel: '#7f9aa6', fairy: '#ec90c6', stellar: '#3fb8c8', mystery: '#6a6dc0',
+}
+function applyHeroTheme(typeNames) {
+    const root = document.getElementById('species-data')
+    if (!root) return
+    const first = (typeNames[0] || 'normal').toLowerCase()
+    const second = (typeNames[1] || typeNames[0] || 'normal').toLowerCase()
+    const c1 = TYPE_HEX[first] || '#5dbe62'
+    const c2 = TYPE_HEX[second] || c1
+    root.style.setProperty('--t1', c1)
+    root.style.setProperty('--t2', c2)
+}
+
 function setTypes(types, specie) {
     types = types.filter(x => x != undefined)
     const core = $('#species-types')
+    const shownTypes = []
     for (let i = 0; i < 3; i++) {
         const type = gameData.typeT[types[i]] || ""
         const node = core.children().eq(i).children().eq(0)
@@ -122,7 +142,9 @@ function setTypes(types, specie) {
         }
         node.show()
         node.text(type).attr("class", `type ${type.toLowerCase()}`)
+        shownTypes.push(type)
     }
+    applyHeroTheme(shownTypes)
     setDefensiveCoverage(
         getDefensiveCoverage(specie, specie.activeAbi)
     )
@@ -298,7 +320,7 @@ function changeBaseStat(node, value, statID, cmp) {
     const maxValue = statID < 6 ? 255 : gameData.speciesStats.result.maxBST
     const percent = ((value / maxValue) * 100).toFixed()
     node.find('.stat-num').css('background-color', color)
-    node.find('.stat-bar').css('background', `linear-gradient(to right, ${color} ${percent}%, #0000 0%)`)[0]
+    node.find('.stat-bar').css('background', `linear-gradient(to right, ${color} ${percent}%, var(--stat-track, #0000) ${percent}%)`)[0]
     node[0].animate([
         {width: "0"},
         {width: `100%`},

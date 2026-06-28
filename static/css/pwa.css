@@ -6,7 +6,7 @@
  */
 
 :root {
-  color-scheme: dark;
+  /* color-scheme is set per light/dark theme in redesign.css */
   /* iOS standalone safe-area helpers (0 in a normal browser tab). */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

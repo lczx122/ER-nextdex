@@ -11,7 +11,7 @@
  *
  * Bump CACHE_VERSION whenever the precache list or strategy changes.
  */
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE = `erdex-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `erdex-runtime-${CACHE_VERSION}`;
 const DATA_CACHE = `erdex-data-${CACHE_VERSION}`;

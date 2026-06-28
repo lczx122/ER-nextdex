@@ -1,496 +1,368 @@
 /* =========================================================================
-   ER NextDex — UI redesign layer
-   Loaded LAST so it wins the cascade. Goals:
-   - One consistent, readable type scale (kills the vw/vh/vmax inconsistency)
-   - Sensible, predictable positioning for the header, search and nav
-   - Cleaner cards, badges, stat bars and buttons
-   It only restyles; it never changes the IDs/classes the JS depends on.
+   ER NextDex — "Modern Pokédex" design system  (Direction A)
+   Loaded LAST so it wins the cascade. Light is the default; dark is a full
+   re-skin via [data-theme]. The whole palette is expressed as the same CSS
+   variables the rest of the app already consumes, so generated content
+   (move rows, ability lists, trainers, filters…) is themed automatically.
    ========================================================================= */
 
+/* ----------------------------------------------------------------- TOKENS */
 :root {
-  /* Type scale — fixed rem so text is identical on phone and desktop.
-     A couple of values use clamp() to stay sane across widths. */
-  --fs-2xs: 0.69rem;
-  --fs-xs:  0.78rem;
-  --fs-sm:  0.86rem;
-  --fs-base: 0.95rem;
-  --fs-md:  1.05rem;
-  --fs-lg:  1.2rem;
-  --fs-xl:  1.45rem;
-  --fs-2xl: 1.8rem;
+  /* Type scale — fixed rem so text is identical on phone and desktop */
+  --fs-2xs: 0.69rem; --fs-xs: 0.78rem; --fs-sm: 0.86rem; --fs-base: 0.95rem;
+  --fs-md: 1.05rem; --fs-lg: 1.2rem; --fs-xl: 1.45rem; --fs-2xl: 1.85rem;
   --fs-title: clamp(1.05rem, 1rem + 1.4vw, 1.5rem);
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --radius: 16px; --radius-sm: 12px; --radius-xs: 9px;
 
-  /* Spacing */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-
-  --radius: 10px;
-  --radius-sm: 7px;
-
-  --accent: var(--positive, #1fc990);
-  --hairline: color-mix(in srgb, var(--font-color, #fff) 14%, transparent);
+  /* Hero type tint (overridden per-species by JS). */
+  --t1: #5dbe62; --t2: #b061c6;
 }
 
-html {
-  font-size: 16px;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-body {
-  font-size: var(--fs-base);
-  line-height: 1.4;
-  letter-spacing: 0.1px;
+/* Light (default) */
+:root, [data-theme="light"] {
+  color-scheme: light;
+  --background: #eef1f6;
+  --surface: #ffffff;
+  --colorA: #ffffff; --colorB: #ffffff; --colorC: #f3f6fb; --colorD: #ffffff;
+  --colorE: rgba(20,30,50,.05);
+  --font-color: #1b2330;
+  --muted: #6c7787;
+  --hairline: #e6eaf1;
+  --shadow: rgba(25,35,60,.12);
+  --card-shadow: 0 4px 16px rgba(25,35,60,.07);
+  --selActive: #d6deea; --selHover: #eef2f8; --selNActive: #f1f4fa;
+  --btnActive: #e3e9f2; --btnNActive: #eef2f8; --btnHover: #e4eaf3;
+  --headerBG: #ffffff;
+  --positive: #2faf59;
+  --accent: #2faf59;
+  --interactible: rgba(47,175,89,.16);
+  --filter-interactible: rgba(150,90,210,.16);
+  --stat-track: #e7ebf2;
+  --icon-filter: brightness(0) opacity(.62);
 }
 
-/* Tame the pixel-art crispness that was being applied to UI chrome icons —
-   keep it only for actual game sprites. */
-#settings-btn { image-rendering: auto; }
+/* Dark */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0e1016;
+  --surface: #1a1f29;
+  --colorA: #1a1f29; --colorB: #1a1f29; --colorC: #161a22; --colorD: #1a1f29;
+  --colorE: rgba(255,255,255,.05);
+  --font-color: #eef2f8;
+  --muted: #9aa6b8;
+  --hairline: #2a313d;
+  --shadow: rgba(0,0,0,.5);
+  --card-shadow: 0 8px 22px rgba(0,0,0,.35);
+  --selActive: #2c3442; --selHover: #2f3a49; --selNActive: #222a36;
+  --btnActive: #2c3442; --btnNActive: #222a36; --btnHover: #2f3a49;
+  --headerBG: #11141b;
+  --positive: #4cd17a;
+  --accent: #4cd17a;
+  --interactible: rgba(76,209,122,.22);
+  --filter-interactible: rgba(170,120,230,.25);
+  --stat-track: #262d3a;
+  --icon-filter: brightness(0) invert(1) opacity(.82);
+}
 
-/* ---------------------------------------------------------------- HEADER */
+html { font-size: 16px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { font-size: var(--fs-base); line-height: 1.4; letter-spacing: .1px; }
+
+/* ----------------------------------------------------------------- HEADER */
 #top-header {
-  height: auto;
-  min-height: 52px;
-  padding: calc(var(--safe-top, 0px) + 6px) var(--sp-3) 6px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  box-shadow: 0 1px 0 var(--hairline);
+  height: auto; min-height: 54px;
+  padding: calc(var(--safe-top, 0px) + 7px) var(--sp-3) 7px;
+  box-sizing: border-box; display: flex; align-items: center; gap: var(--sp-2);
+  background: var(--headerBG);
+  border-bottom: 1px solid var(--hairline);
 }
-/* Undo the `#top-header > * { margin:auto }` that pushed everything around,
-   and lay it out as [filter] [title] [settings]. */
 #top-header > * { margin: 0; }
 .main-title {
-  order: 2;
-  flex: 1 1 auto;
-  text-align: center;
-  font-size: var(--fs-title);
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  padding: 0;
-  line-height: 1.1;
+  order: 2; flex: 1 1 auto; text-align: center; color: var(--font-color);
+  font-size: var(--fs-title); font-weight: 800; letter-spacing: .3px; line-height: 1.1;
 }
-#top-header > div { order: 1; }     /* filter icon + counter */
+.main-title::before {
+  content: ""; display: inline-block; width: 1.15em; height: 1.15em;
+  margin-right: .45em; vertical-align: -0.22em;
+  background: url(../icons/favicon.svg) center / contain no-repeat;
+}
+#top-header > div { order: 1; }
 #settings-btn { order: 3; }
-
 #filter-icon, #settings-btn {
-  width: 26px !important;
-  height: 26px !important;
-  padding: 6px !important;
-  border-radius: var(--radius-sm);
-  box-sizing: content-box;
+  width: 24px !important; height: 24px !important; padding: 7px !important;
+  border-radius: var(--radius-xs); box-sizing: content-box; cursor: pointer;
+  filter: var(--icon-filter);
+}
+#filter-icon:hover, #settings-btn:hover { background: var(--btnHover); }
+#filter-counter {
+  right: auto; bottom: auto; font-size: var(--fs-2xs) !important;
+  min-width: 16px; height: 16px; line-height: 16px; padding: 0 4px; text-align: center;
 }
 
-/* --------------------------------------------------------------- SEARCH */
+/* ----------------------------------------------------------------- SEARCH */
 .search-wrapper {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--sp-2) var(--sp-3);
-  gap: var(--sp-2);
-  align-items: stretch;
-  background: var(--colorB);
-  box-shadow: 0 1px 0 var(--hairline);
+  width: 100%; box-sizing: border-box; padding: var(--sp-2) var(--sp-3);
+  gap: var(--sp-2); align-items: stretch; background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
 }
 .search-keys-wrapper { width: auto !important; }
-#search-keys,
-#search-bar,
-.filter-search {
-  font-size: var(--fs-base) !important;
-  height: 40px;
-  box-sizing: border-box;
+#search-keys, #search-bar, .filter-search {
+  font-size: var(--fs-base) !important; height: 42px; box-sizing: border-box;
 }
 #search-keys {
-  min-width: 5.5em;
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
-  border: 1px solid var(--selActive);
-  font-weight: 600;
+  min-width: 5.5em; border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+  border: 1px solid var(--selActive); background: var(--btnNActive);
+  color: var(--font-color); font-weight: 600;
 }
+#search-keys:hover { background: var(--btnHover); }
 .main-search-label { width: auto !important; flex: 1 1 auto; }
 #search-bar {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
-  border: 1px solid var(--selActive);
-  border-left: 0;
-  background: var(--colorA);
-  color: var(--font-color);
-  text-align: left !important;
-  padding-left: 12px !important;
+  border: 1px solid var(--selActive); border-left: 0;
+  background: var(--background); color: var(--font-color);
+  text-align: left !important; padding-left: 14px !important;
 }
-#search-bar::placeholder { color: color-mix(in srgb, var(--font-color) 55%, transparent); }
-#search-keys-selections,
-#search-suggestion > div { font-size: var(--fs-base) !important; }
-#search-suggestion > div,
-#search-keys-selections > div { padding: 8px 10px; }
-
+#search-bar::placeholder { color: color-mix(in srgb, var(--font-color) 45%, transparent); }
+#search-keys-selections, #search-suggestion > div { font-size: var(--fs-base) !important; }
+#search-suggestion > div, #search-keys-selections > div { padding: 9px 11px; }
 #to-filter {
-  width: auto !important;
-  padding: 0 var(--sp-3);
-  border-radius: var(--radius-sm);
-  background: var(--btnNActive);
-  font-size: var(--fs-sm);
-  white-space: nowrap;
-  font-weight: 600;
+  width: auto !important; padding: 0 var(--sp-3); border-radius: var(--radius-sm);
+  background: var(--btnNActive); font-size: var(--fs-sm); white-space: nowrap; font-weight: 700;
 }
 #to-filter:hover { background: var(--selHover); }
 
-#filter-counter {
-  right: auto;
-  bottom: auto;
-  font-size: var(--fs-2xs) !important;
-  min-width: 16px;
-  height: 16px;
-  line-height: 16px;
-  padding: 0 4px;
-  text-align: center;
-}
-
-/* ------------------------------------------------------------ SIDE NAV */
-aside { gap: 2px; background: var(--colorB); }
+/* ----------------------------------------------------------------- NAV */
+aside { gap: 2px; background: var(--surface); }
 .side-btn {
-  font-size: var(--fs-sm) !important;
-  font-weight: 600;
-  padding: 10px 6px;
-  border-radius: 0;
-  gap: 1px;
-  line-height: 1.15;
-  position: relative;
+  font-size: var(--fs-sm) !important; font-weight: 700; padding: 11px 6px;
+  border-radius: 0; gap: 1px; line-height: 1.15; position: relative; color: var(--muted);
 }
 .big-select { font-size: var(--fs-sm) !important; }
-.small-select { font-size: var(--fs-2xs) !important; opacity: 0.75; }
-/* Clear active indicator instead of relying on a faint bg difference. */
-.btn-active { background-color: var(--colorC) !important; }
-.btn-active::after {
-  content: "";
-  position: absolute;
-  background: var(--accent);
-}
+.small-select { font-size: var(--fs-2xs) !important; opacity: .8; }
+.btn-active { background-color: var(--colorC) !important; color: var(--font-color); }
+.btn-active .big-select, .btn-active .small-select { color: var(--font-color); }
+.btn-active::after { content: ""; position: absolute; background: var(--accent); }
 @media (orientation: landscape) {
-  aside { min-width: 9.5em; padding: var(--sp-2) 0; }
+  aside { min-width: 10em; padding: var(--sp-2) 0; border-left: 1px solid var(--hairline); }
   .side-btn { align-items: center; }
-  .btn-active::after { left: 0; top: 12%; bottom: 12%; width: 3px; border-radius: 3px; }
+  .btn-active::after { left: 0; top: 14%; bottom: 14%; width: 3px; border-radius: 3px; }
 }
 @media (orientation: portrait) {
-  aside { min-height: auto; padding: 2px 0 var(--safe-bottom, 0px); }
+  aside { min-height: auto; padding: 2px 0 var(--safe-bottom, 0px); border-top: 1px solid var(--hairline); }
   .side-btn { flex: 1; }
-  .btn-active::after { left: 18%; right: 18%; top: 0; height: 3px; border-radius: 3px; }
+  .btn-active::after { left: 20%; right: 20%; top: 0; height: 3px; border-radius: 3px; }
 }
 
-/* ------------------------------------------------------------- PANELS */
+/* ----------------------------------------------------------------- LISTS */
 .panel { font-size: var(--fs-base); }
-
-/* Data list (left column / portrait top strip) */
-.data-list { width: 8.5em; min-width: 8.5em; }
-.data-list-row { font-size: var(--fs-sm); border-radius: var(--radius-sm); }
-@media (orientation: landscape) {
-  .data-list { padding: var(--sp-1); gap: 1px; }
-  .data-list-row { padding: 7px 8px; }
-  .data-list-row:hover { background: var(--selHover); }
-}
-@media (orientation: portrait) {
-  .data-list { min-height: 64px; max-height: 64px; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
-}
-
-/* ===================== SPECIES DETAIL — REBUILT LAYOUT =====================
-   Reading order is now: identity hero → stats + abilities cards → tabs →
-   tab content. On wide detail panes the stats/abilities sit side-by-side. */
-#species-data {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-3);
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-/* Hero: sprite + name/id/types */
-.sp-hero {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  background: var(--colorB);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  padding: var(--sp-3);
-}
-#species-front.sp-hero-sprite {
-  width: 104px !important;
-  height: 104px !important;
-  min-width: 104px;
-  min-height: 104px;
-  flex: none;
-  margin: 0;
-  object-fit: contain;
-  cursor: pointer;
-  border-radius: var(--radius);
-  background: radial-gradient(circle at 50% 62%,
-              color-mix(in srgb, var(--accent) 16%, transparent), transparent 68%);
-}
-.sp-hero-id { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-
-/* Overview cards */
-.sp-overview { display: grid; grid-template-columns: 1fr; gap: var(--sp-3); }
-@media (min-width: 680px) {
-  .sp-overview { grid-template-columns: 1.05fr 1fr; align-items: stretch; }
-}
-.sp-card-abilities { align-items: center; justify-content: center; }
-.sp-card {
-  background: var(--colorB);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  padding: var(--sp-3);
-  min-width: 0;
-}
-.sp-card-stats #species-basestats { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.sp-card-stats #species-coverage { margin-top: var(--sp-2); }
-.sp-card-abilities { display: flex; gap: var(--sp-3); }
-.sp-card-abilities .species-abi-inn { flex: 1; max-width: none; min-width: 0; align-items: stretch; }
-.sp-card-abilities .species-abi-inn .abi-inn-info { align-self: center; }
-.stat-row { min-width: 0; }
-.stat-bar { min-width: 16px; }
-.stat-num { flex: none; }
-
-/* Tab content panel */
-#species-bot {
-  background: var(--colorC);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-#species-bot > .species-sub-pannel { min-height: 0; }
-@media (orientation: landscape) { #species-bot { flex: 1 1 auto; min-height: 360px; } }
-.species-move-pwr { min-width: 2.2em; padding-right: 2px; }
-.abi-inn-info {
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  opacity: 0.8;
-  border-width: 1px;
-  border-radius: 999px;
-  padding: 1px 8px;
-}
-#species-innates, #species-abilities { font-size: var(--fs-sm) !important; gap: 2px; }
-
-#species-name {
-  font-size: var(--fs-xl);
-  font-weight: 700;
-}
-#species-id { font-size: var(--fs-sm); opacity: 0.7; }
-
-.stat-row { font-size: var(--fs-sm) !important; gap: var(--sp-1); margin: 1px 0; }
-.stat-name { width: 2.4em; padding-left: 6px; opacity: 0.85; text-align: left; }
-.stat-num {
-  width: 2em; min-width: 2em;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  text-align: center;
-  border-radius: 4px;
-}
-.stat-bar { height: 9px; border-radius: 999px; overflow: hidden; }
-
-/* Type badges */
-.type {
-  border-radius: 999px;
-  padding: 3px 12px !important;
-  font-size: var(--fs-2xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  line-height: 1.4;
-  white-space: nowrap;
-}
-#species-types { margin-left: 0; gap: var(--sp-1); }
-
-/* Compact type chips inside the dense coverage / resistance grids need less
-   padding and wider cells so 6-letter names (POISON, DRAGON…) don't truncate. */
-.species-coverage-list .type,
-.typecalc-coverage-list .type,
-.typecalc-info-row .type {
-  padding: 2px 5px !important;
-  letter-spacing: 0;
-  text-transform: none;            /* mixed-case is narrower → no truncation */
-  text-align: center;
-  justify-content: center;
-}
-/* Wide enough for the longest full type name (Fighting / Electric). */
-.species-coverage-list > div,
-.typecalc-coverage-list > div { width: 5em; }
-
-/* Sub-tab switch (Moves / Evo / Misc / Sets) */
-.species-switch { gap: var(--sp-1); padding: var(--sp-1) 0; flex-wrap: wrap; justify-content: center; }
-.species-switch > * {
-  margin-right: 0 !important;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-}
-.species-switch > .sel-active { background: var(--accent); color: #06241c; }
-
-.species-sub-pannel { font-size: var(--fs-sm) !important; }
-.species-moves-title {
-  font-size: var(--fs-xs) !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 700;
-  opacity: 0.85;
-  padding: var(--sp-1) 0;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-.species-move-row { min-height: 26px; padding: 2px 6px; }
-.species-bot, .species-sub-pannel { overflow-x: hidden; }
-.species-move-pwr { font-size: var(--fs-2xs); }
-.species-coverage-list { font-size: var(--fs-xs) !important; }
-#species-desc { font-size: var(--fs-sm); line-height: 1.45; border-radius: var(--radius-sm); }
-
-/* -------- Abilities / Moves / Trainers / Type calc — unify text sizes -------- */
-.abi-row,
-.typecalc-row,
-.typecalc-abi-info { font-size: var(--fs-sm) !important; }
-.abi-name, .typecalc-abi-name { width: 8.5em; min-width: 8.5em; font-weight: 600; }
-.abi-desc { line-height: 1.45; }
-#moves-pwr { font-size: 2.4em !important; }
-.move-overlay-fill { font-size: 2em !important; }
-.move-overlay-effects { font-size: var(--fs-xs) !important; line-height: 1.4; }
-.typecalc-info-row,
-.typecalc-dmg-mod,
-.typecalc-coverage-list { font-size: var(--fs-sm) !important; }
-.typecalc-coverage-mul { font-size: var(--fs-sm) !important; }
-@media (orientation: portrait) {
-  .typecalc-coverage-list,
-  .typecalc-coverage-mul { font-size: var(--fs-md) !important; }
-}
-
-/* -------- Locations -------- */
-.location-title { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; }
-.location-row { font-size: var(--fs-sm); }
-
-/* ---------------------------------------------------------- OVERLAYS */
-/* Settings / filter modals: readable, modern, consistent. */
-#settings-frame {
-  font-size: var(--fs-base);
-  border: 1px solid var(--selActive);
-  border-radius: var(--radius);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
-  padding: var(--sp-3);
-  width: min(560px, 92vw);
-  left: 50%;
-  transform: translateX(-50%);
-  gap: 2px;
-}
-#settings-frame h1, #settings-frame h2 { font-size: var(--fs-lg); }
-.settings-row { font-size: var(--fs-base); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
-.settings-row > * { margin-right: 0 !important; }
-.settings-row button,
-#settings-frame button {
-  font-size: var(--fs-sm);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--btnNActive);
-  color: var(--font-color);
-  border: 1px solid var(--selActive);
-  cursor: pointer;
-}
-.settings-row button:hover,
-#settings-frame button:hover { background: var(--selHover); }
-.settings-row > input[type='radio'] { transform: scale(1.4) !important; }
-.thanks { font-size: var(--fs-xs); opacity: 0.8; line-height: 1.4; }
-
-#filter-help { font-size: var(--fs-sm) !important; line-height: 1.45; }
-.filter-help-title { font-size: var(--fs-lg) !important; }
-.filter-key, .filter-search { font-size: var(--fs-sm) !important; }
-.filter-title { font-size: var(--fs-md); padding: var(--sp-1) 0; }
-
-/* ----------------------------------------------------------- GENERIC */
-.btn, .sel-active, .sel-n-active { border-radius: var(--radius-sm); }
-input[type='radio'] { width: 1.05em; height: 1.05em; }
-
-/* Window/tooltip popovers */
-.window-frame, .tooltip { font-size: var(--fs-sm); border-radius: var(--radius); }
-
-/* Smooth the hover-border layout jolt on interactible hints. */
-.interactible:hover, .filter-interactible:hover { border-width: 2px !important; }
-
-/* ===================== APP SHELL & MASTER LIST (REBUILD) ===================== */
-
-/* Brand mark in the header title */
-.main-title::before {
-  content: "";
-  display: inline-block;
-  width: 1.15em;
-  height: 1.15em;
-  margin-right: 0.45em;
-  vertical-align: -0.22em;
-  background: url(../icons/favicon.svg) center / contain no-repeat;
-}
-
-/* Master list — a clean, scannable Pokédex list */
-.data-list { background: var(--colorB); }
+.data-list { width: 8.5em; min-width: 8.5em; background: var(--surface); }
 .data-list-row {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  color: var(--font-color);
+  display: flex; align-items: center; gap: var(--sp-2);
+  font-size: var(--fs-sm); border-radius: var(--radius-xs); color: var(--font-color);
 }
 .species-list-sprite { width: 40px; height: 40px; flex: none; object-fit: contain; image-rendering: pixelated; }
 .species-name { font-weight: 600; min-width: 0; }
 .data-list-row.sel-active {
-  background: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+  background: var(--interactible) !important;
   box-shadow: inset 3px 0 0 var(--accent);
 }
 @media (orientation: landscape) {
-  .data-list { width: 11em; min-width: 11em; }
-  .data-list-row { flex-wrap: nowrap; justify-content: flex-start; text-align: left; }
+  .data-list { width: 11em; min-width: 11em; padding: var(--sp-1); gap: 1px; border-right: 1px solid var(--hairline); }
+  .data-list-row { padding: 8px; flex-wrap: nowrap; justify-content: flex-start; text-align: left; }
+  .data-list-row:hover { background: var(--selHover); }
 }
 @media (orientation: portrait) {
-  /* horizontal strip: keep sprite-over-name, but a touch taller for tap room */
-  .data-list { min-height: 72px; max-height: 72px; }
+  .data-list { min-height: 74px; max-height: 74px; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
   .species-list-sprite { width: 34px; height: 34px; }
-  .data-list-row { flex-direction: column; gap: 0; }
+  .data-list-row { flex-direction: column; gap: 0; padding: 4px 8px; }
 }
 
-/* Generic content panels (moves / locations / trainers / builder) get the same
-   breathing room and card-like surfaces as the species detail. */
-#moves-data, #locations-data, #trainers-data, #builder-data {
-  padding: var(--sp-3);
-  box-sizing: border-box;
-  gap: var(--sp-3);
+/* ============================ SPECIES DETAIL ============================= */
+.data-data { background: var(--background); }
+#species-data {
+  display: flex; flex-direction: column; gap: var(--sp-3);
+  padding: var(--sp-3); box-sizing: border-box; min-width: 0;
 }
-.moves-top, .moves-bot,
-.location-field,
-#trainers-infobar, #trainers-infobar2, #trainers-team {
-  border-radius: var(--radius);
+/* The detail is the scroll container; children must keep their natural height
+   (not get flex-shrunk into a clipped sliver) so the panel scrolls instead. */
+#species-data > * { flex: 0 0 auto; }
+
+/* Hero — tinted by the mon's types (--t1/--t2 set by JS) */
+.sp-hero {
+  display: flex; align-items: center; gap: var(--sp-3);
+  border-radius: var(--radius); padding: var(--sp-4); color: #fff; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--t1), var(--t2));
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--t2) 34%, transparent);
 }
-.moves-top { padding: var(--sp-2); }
-.location-field { background: var(--colorB); border: 1px solid var(--hairline); padding: var(--sp-2); }
+.sp-hero::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120% 100% at 18% 0%, rgba(255,255,255,.28), transparent 55%);
+  pointer-events: none;
+}
+#species-front.sp-hero-sprite {
+  width: 112px !important; height: 112px !important; min-width: 112px; min-height: 112px;
+  flex: none; margin: 0; object-fit: contain; cursor: pointer; position: relative; z-index: 1;
+  image-rendering: pixelated; filter: drop-shadow(0 8px 10px rgba(0,0,0,.28));
+}
+.sp-hero-id { display: flex; flex-direction: column; gap: 7px; min-width: 0; position: relative; z-index: 1; }
+#species-name { font-size: clamp(1.45rem, 1.1rem + 2vw, 1.85rem); font-weight: 900; line-height: 1.05; color: #fff; letter-spacing: .3px; }
+#species-id { font-size: var(--fs-sm); color: rgba(255,255,255,.85); font-weight: 700; }
+#species-types { margin-left: 0; gap: var(--sp-2); flex-wrap: wrap; }
+/* The species panel always renders 3 type slots; the JS only hides the inner
+   <span> of unused ones. Hide the whole empty pill so it isn't a blank chip. */
+#species-types > .type:has(> span[style*="display: none"]) { display: none !important; }
+/* On the gradient hero, type chips read best as translucent white */
+.sp-hero #species-types .type {
+  background: rgba(255,255,255,.22) !important; color: #fff !important;
+  border: 1px solid rgba(255,255,255,.4); padding: 4px 11px !important;
+}
+
+/* Overview cards */
+.sp-overview { display: grid; grid-template-columns: 1fr; gap: var(--sp-3); }
+@media (min-width: 680px) { .sp-overview { grid-template-columns: 1.05fr 1fr; align-items: stretch; } }
+.sp-card {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+  padding: var(--sp-4); min-width: 0; box-shadow: var(--card-shadow);
+}
+.sp-card-stats #species-basestats { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.sp-card-stats #species-coverage { margin-top: var(--sp-2); }
+.sp-card-abilities { display: flex; gap: var(--sp-3); align-items: center; justify-content: center; }
+.sp-card-abilities .species-abi-inn { flex: 1; max-width: none; min-width: 0; }
+
+/* Stats */
+.stat-row { font-size: var(--fs-sm) !important; gap: var(--sp-2); align-items: center; margin: 0; min-width: 0; }
+.stat-name { width: 2.6em; padding-left: 0; color: var(--muted); font-weight: 700; text-align: left; }
+.stat-num {
+  width: 2.1em; min-width: 2.1em; flex: none; font-variant-numeric: tabular-nums;
+  font-weight: 800; text-align: center; border-radius: 6px; color: #fff;
+}
+.stat-bar { height: 10px; min-width: 16px; border-radius: 999px; overflow: hidden; background: var(--stat-track); }
+
+/* Abilities & innates as chips */
+.abi-inn-info {
+  font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
+  opacity: 1; border: 0; border-radius: 0; padding: 0 0 var(--sp-2); font-weight: 800;
+  margin: 0 0 var(--sp-1); align-self: center;
+}
+#species-innates, #species-abilities { font-size: var(--fs-sm) !important; gap: var(--sp-1); width: 100%; }
+.species-ability, .species-innate {
+  width: 100%; padding: 9px 10px; border-radius: var(--radius-xs);
+  background: var(--btnNActive); font-weight: 700; text-align: center; box-sizing: border-box;
+}
+.species-ability.sel-active {
+  background: var(--interactible); color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.species-ability.sel-n-active:hover { background: var(--btnHover); }
+
+/* Type badges (everywhere) */
+.type {
+  border-radius: 999px; padding: 4px 13px !important; font-size: var(--fs-2xs);
+  font-weight: 800; text-transform: uppercase; letter-spacing: .6px; line-height: 1.4; white-space: nowrap;
+}
+
+/* Segmented tabs — active tab uses the mon's type gradient */
+.species-switch { gap: var(--sp-2); padding: var(--sp-1) 0; flex-wrap: wrap; justify-content: center; }
+.species-switch > * {
+  margin-right: 0 !important; padding: 8px 16px; border-radius: 999px;
+  font-size: var(--fs-sm); font-weight: 800; background: var(--surface);
+  border: 1px solid var(--hairline); color: var(--muted); box-shadow: var(--card-shadow);
+}
+.species-switch > .sel-active {
+  background: linear-gradient(135deg, var(--t1), var(--t2)); color: #fff; border-color: transparent;
+}
+
+/* Tab content */
+#species-bot {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+  overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--card-shadow);
+}
+#species-bot > .species-sub-pannel { min-height: 0; }
+@media (orientation: landscape) { #species-bot { flex: 1 1 auto; min-height: 360px; } }
+.species-sub-pannel { font-size: var(--fs-sm) !important; }
+.species-moves-title {
+  font-size: var(--fs-xs) !important; text-transform: uppercase; letter-spacing: .5px;
+  font-weight: 800; color: var(--muted); padding: var(--sp-2) 0; position: sticky; top: 0; z-index: 1;
+  background: var(--surface);
+}
+.species-move-row { min-height: 30px; padding: 3px 10px; }
+.species-move-row:not(:last-child) { border-bottom: 1px solid var(--hairline); }
+.species-bot, .species-sub-pannel { overflow-x: hidden; }
+.species-move-pwr { min-width: 2.2em; padding-right: 2px; font-size: var(--fs-2xs); }
+#learnset, #tmhm, #eggmoves, #preevomoves { background: transparent; }
+#species-desc { font-size: var(--fs-sm); line-height: 1.5; border-radius: var(--radius-sm); background: var(--colorC); }
+
+/* Compact type chips in coverage / resistance grids: full names, no truncation */
+.species-coverage-list .type, .typecalc-coverage-list .type, .typecalc-info-row .type {
+  padding: 2px 5px !important; letter-spacing: 0; text-transform: none; text-align: center; justify-content: center;
+}
+.species-coverage-list > div, .typecalc-coverage-list > div { width: 5em; }
+.species-coverage-list { font-size: var(--fs-xs) !important; }
+
+/* ===================== OTHER PANELS — consistent surfaces ===================== */
+#moves-data, #locations-data, #trainers-data, #builder-data { padding: var(--sp-3); box-sizing: border-box; gap: var(--sp-3); }
+.abi-row, .typecalc-row, .typecalc-abi-info { font-size: var(--fs-sm) !important; }
+.abi-name, .typecalc-abi-name { width: 8.5em; min-width: 8.5em; font-weight: 700; }
+.abi-desc { line-height: 1.5; }
+#moves-pwr { font-size: 2.4em !important; }
+.moves-top, .moves-bot { border-radius: var(--radius); }
+.moves-top { padding: var(--sp-2); background: var(--surface); border: 1px solid var(--hairline); }
+.moves-bot { background: var(--surface); border: 1px solid var(--hairline); margin-top: var(--sp-3); }
+.move-overlay-fill { font-size: 2em !important; }
+.move-overlay-effects { font-size: var(--fs-xs) !important; line-height: 1.4; }
+.location-field { background: var(--surface); border: 1px solid var(--hairline); padding: var(--sp-2); border-radius: var(--radius); }
+.location-title { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .4px; font-weight: 800; color: var(--muted); }
+.location-row { font-size: var(--fs-sm); }
 #trainers-infobar, #trainers-infobar2 {
-  background: var(--colorB);
-  border: 1px solid var(--hairline);
-  padding: var(--sp-2) var(--sp-3);
-  align-items: center;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+  padding: var(--sp-2) var(--sp-3); align-items: center; gap: var(--sp-2); flex-wrap: wrap;
 }
-#trainers-name { font-size: var(--fs-lg); font-weight: 700; }
-.trainers-pokemon {
-  border-radius: var(--radius);
-  border: 1px solid var(--hairline);
-  background: var(--colorB);
-}
-
-/* Type-calc input rows as a tidy card */
+#trainers-name { font-size: var(--fs-lg); font-weight: 800; }
+.trainers-pokemon { border-radius: var(--radius); border: 1px solid var(--hairline); background: var(--surface); }
 .typecalc-controls {
-  background: var(--colorB);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin: var(--sp-3) var(--sp-3) 0;
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+  overflow: hidden; margin: var(--sp-3) var(--sp-3) 0;
 }
-.tc-dropdown-btn { border-radius: var(--radius-sm); }
+.typecalc-row, .typecalc-info-row, .typecalc-dmg-mod, .typecalc-coverage-list, .typecalc-coverage-mul { font-size: var(--fs-sm) !important; }
+.tc-dropdown-btn { border-radius: var(--radius-xs); background: var(--btnNActive); color: var(--font-color); }
+@media (orientation: portrait) { .typecalc-coverage-list, .typecalc-coverage-mul { font-size: var(--fs-md) !important; } }
 
-/* Loading/error screen niceties */
-#loading, #debug { border-radius: var(--radius); }
+/* ----------------------------------------------------------------- OVERLAYS */
+#settings-frame {
+  font-size: var(--fs-base); background: var(--surface); border: 1px solid var(--hairline);
+  border-radius: var(--radius); box-shadow: 0 18px 50px var(--shadow); padding: var(--sp-4);
+  width: min(560px, 92vw); left: 50%; transform: translateX(-50%); gap: 2px; color: var(--font-color);
+}
+.settings-row { font-size: var(--fs-base); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.settings-row > * { margin-right: 0 !important; }
+.settings-row button, #settings-frame button {
+  font-size: var(--fs-sm); padding: 9px 13px; border-radius: var(--radius-xs);
+  background: var(--btnNActive); color: var(--font-color); border: 1px solid var(--selActive); cursor: pointer;
+}
+.settings-row button:hover, #settings-frame button:hover { background: var(--selHover); }
+.settings-row > input[type='radio'] { transform: scale(1.4) !important; }
+.thanks { font-size: var(--fs-xs); color: var(--muted); line-height: 1.4; }
+#filter-frame, #filter-help { background: var(--surface); color: var(--font-color); }
+#filter-help { font-size: var(--fs-sm) !important; line-height: 1.5; }
+.filter-help-title { font-size: var(--fs-lg) !important; }
+.filter-key, .filter-search { font-size: var(--fs-sm) !important; }
+.filter-title { font-size: var(--fs-md); padding: var(--sp-1) 0; }
+
+/* ----------------------------------------------------------------- MISC */
+.btn, .sel-active, .sel-n-active { border-radius: var(--radius-xs); }
+input[type='radio'] { width: 1.05em; height: 1.05em; }
+.window-frame, .tooltip { font-size: var(--fs-sm); border-radius: var(--radius); background: var(--surface); color: var(--font-color); }
+.interactible:hover, .filter-interactible:hover { border-width: 2px !important; }
+#settings-btn { image-rendering: auto; }
+.loading-icons { display: inline-block; }
+
+/* Type-text colours (move names etc.) were tuned for dark backgrounds; a few
+   pale ones are low-contrast on the light theme. Darken just those. */
+[data-theme="light"] .normal-t   { color: #7a7a52; }
+[data-theme="light"] .electric-t { color: #c79a00; }
+[data-theme="light"] .steel-t    { color: #6f7d8c; }
+[data-theme="light"] .ice-t      { color: #2aa3c0; }
+[data-theme="light"] .flying-t   { color: #5a6fd6; }
+[data-theme="light"] .bug-t      { color: #7c9100; }
+[data-theme="light"] .fairy-t    { color: #c95fb0; }
+[data-theme="light"] .rock-t     { color: #9a8a4e; }
