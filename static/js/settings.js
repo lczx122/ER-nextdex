@@ -185,6 +185,9 @@ export function setupSettings(){
     $('#settings-btn').on('click', function(){
         $('#settings-frame').toggle()
     })
+    $('#settings-close').on('click', function(){
+        $('#settings-frame').hide()
+    })
     $('#settings-btn').on('mouseover', function(){
         $(this).attr('src', './icons/settings_hover.png')
     })

@@ -514,6 +514,12 @@ aside { gap: 2px; background: var(--surface); }
   top: 64px !important; height: auto !important; bottom: auto !important;
   max-height: calc(100dvh - 132px); overflow-y: auto;
 }
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+  padding-bottom: var(--sp-2); margin-bottom: var(--sp-1); border-bottom: 1px solid var(--hairline);
+  position: sticky; top: calc(-1 * var(--sp-4)); background: var(--surface); z-index: 1;
+}
+.settings-title { font-size: var(--fs-lg); font-weight: 800; }
 .settings-row { font-size: var(--fs-base); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .settings-row > * { margin-right: 0 !important; }
 .settings-row button, #settings-frame button {
