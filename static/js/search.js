@@ -233,6 +233,9 @@ export function setupSearch(){
     $('#to-filter').on('click', function(){
         $('#filter-frame').toggle()
     })
+    $('#filter-close').on('click', function(){
+        $('#filter-frame').hide()
+    })
     $('#search-keys').on('click', function(ev){
         ev.stopPropagation()
         clickOutsideToHide($('#search-keys-selections')[0], $('#search-keys')[0])

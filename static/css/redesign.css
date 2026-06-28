@@ -547,6 +547,13 @@ aside { gap: 2px; background: var(--surface); }
   background: transparent !important; padding: 0 0 var(--sp-2); border-bottom: 1px solid var(--hairline);
 }
 .filter-title > span:first-child { font-size: var(--fs-lg); font-weight: 800; margin-right: auto; }
+.filter-close {
+  margin-left: var(--sp-1); width: 34px; height: 34px; flex: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  background: var(--btnNActive); border: 1px solid var(--hairline); color: var(--font-color);
+  font-size: 16px; font-weight: 700; line-height: 1;
+}
+.filter-close:hover { background: #d6483b; color: #fff; border-color: #d6483b; }
 .filter-title > * { margin: 0 !important; }
 .filter-title label { color: var(--muted); font-size: var(--fs-xs); }
 #filter-main-operator {
