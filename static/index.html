@@ -318,57 +318,47 @@
                 <div id="moves-list" class="data-list">
                 </div>
                 <div id="moves-data" class="data-data">
-                    <div class="moves-top">
-                        <div class="moves-top-sub">
-                            <div class="moves-large">
-                                <span>Power</span>
-                                <div id="moves-pwr"></div>
-                            </div>
-                            <div class="moves-xlarge">
-                                <div class="xlarge-row">
-                                    <span>acc</span>
-                                    <div id="moves-acc"></div>
-                                </div>
-                                <div class="xlarge-row">
-                                    <span>pp</span>
-                                    <div id="moves-pp"></div>
-                                </div>
-                                <div class="xlarge-row">
-                                    <span>Priority</span>
-                                    <div id="moves-prio"></div>
-                                </div>
-                                <div class="xlarge-row">
-                                    <span>Eff. Chance</span>
-                                    <div id="moves-chance"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="moves-top-sub">
-                            <img id="moves-split" class="filter-interactible">
-                            <div id="moves-target">
-                                <div class="target-row">
-                                    <div id="foe1" class="foe">Foe</div>
-                                    <div id="foe2" class="foe">Foe</div>
-                                    <div id="foe3" class="foe">Foe</div>
-                                </div>
-                                <div class="target-row">
-                                    <div id="ally1" class="ally">ally</div>
-                                    <div id="allySelf" class="self">self</div>
-                                    <div id="ally2" class="ally">ally</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="moves-bot">
-                        <div class="moves-bot-info">
+                    <!-- Header: move name + id + type pills + category icon -->
+                    <header class="mv-hero">
+                        <div class="mv-hero-id">
                             <div id="moves-name" class="filter-interactible"></div>
                             <div id="moves-internal-id"></div>
+                        </div>
+                        <div class="mv-hero-tags">
                             <div id="moves-types1"><span></span></div>
                             <div id="moves-types2"><span></span></div>
+                            <img id="moves-split" class="filter-interactible">
                         </div>
+                    </header>
+                    <!-- Key numbers as tiles -->
+                    <div class="mv-stats">
+                        <div class="mv-stat"><span class="mv-stat-l">Power</span><div id="moves-pwr" class="mv-stat-v"></div></div>
+                        <div class="mv-stat"><span class="mv-stat-l">Accuracy</span><div id="moves-acc" class="mv-stat-v"></div></div>
+                        <div class="mv-stat"><span class="mv-stat-l">PP</span><div id="moves-pp" class="mv-stat-v"></div></div>
+                        <div class="mv-stat"><span class="mv-stat-l">Priority</span><div id="moves-prio" class="mv-stat-v"></div></div>
+                        <div class="mv-stat"><span class="mv-stat-l">Eff. Chance</span><div id="moves-chance" class="mv-stat-v"></div></div>
+                    </div>
+                    <!-- Targeting -->
+                    <section class="mv-card">
+                        <div class="mv-card-title">Targeting</div>
+                        <div id="moves-target">
+                            <div class="target-row">
+                                <div id="foe1" class="foe">Foe</div>
+                                <div id="foe2" class="foe">Foe</div>
+                                <div id="foe3" class="foe">Foe</div>
+                            </div>
+                            <div class="target-row">
+                                <div id="ally1" class="ally">ally</div>
+                                <div id="allySelf" class="self">self</div>
+                                <div id="ally2" class="ally">ally</div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Description & flags -->
+                    <section class="mv-card">
                         <div id="moves-desc"></div>
                         <div id="moves-flags"></div>
-                    </div>
+                    </section>
 
                 </div>
             </div>

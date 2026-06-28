@@ -30,11 +30,28 @@ export function feedPanelMoves(moveID) {
     $('#moves-list').children().eq(moveID - 1).addClass("sel-active").removeClass("sel-n-active")
 }
 
+const MV_TYPE_HEX = {
+    normal: '#9099a1', fire: '#f1762b', water: '#4f90d9', electric: '#f3c93b',
+    grass: '#5dbe62', ice: '#76d0c8', fighting: '#cf4068', poison: '#b061c6',
+    ground: '#d8884a', flying: '#8aa6e6', psychic: '#f56c8a', bug: '#9fc02e',
+    rock: '#c7b36a', ghost: '#6a6dc0', dragon: '#7d62e0', dark: '#5b5366',
+    steel: '#7f9aa6', fairy: '#ec90c6', stellar: '#3fb8c8', mystery: '#6a6dc0',
+}
 function setTypes(types) {
+    const names = []
     for (let i = 0; i < 2; i++) {
         const type = gameData.typeT[types[i]] || ""
         $(`#moves-types${i + 1}`).attr("class", `type ${type.toLowerCase()} ${getHintInteractibilityClass()}`)
             .children().text(type)
+        if (type) names.push(type)
+    }
+    // Tint the move header by its type, mirroring the species hero.
+    const data = document.getElementById('moves-data')
+    if (data) {
+        const c1 = MV_TYPE_HEX[(names[0] || 'normal').toLowerCase()] || '#6aa0e0'
+        const c2 = MV_TYPE_HEX[(names[1] || names[0] || 'normal').toLowerCase()] || c1
+        data.style.setProperty('--t1', c1)
+        data.style.setProperty('--t2', c2)
     }
 }
 const flagMap = {
