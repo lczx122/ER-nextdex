@@ -89,6 +89,14 @@ body {
   display: flex;
   flex-direction: column;
 }
+/* iOS standalone bug: 100dvh reports a stale/short value on PWA cold-start
+   (it only self-corrects after a portrait→landscape→portrait rotation),
+   which leaves an empty strip of page background below the pinned nav. In
+   installed/standalone mode there is no browser toolbar, so 100vh equals the
+   visible viewport and is stable from the first paint — use it there. */
+@media (display-mode: standalone) {
+  body { height: 100vh; }
+}
 #top-header, .search-wrapper { flex: 0 0 auto; }
 #non-header { flex: 1 1 auto; min-height: 0; min-width: 0; overflow: hidden; }
 main { min-height: 0; min-width: 0; overflow: hidden; }
