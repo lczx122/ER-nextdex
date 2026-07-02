@@ -81,6 +81,11 @@
                 <div id="species-list" class="data-list">
                 </div>
                 <div id="species-data" class="data-data">
+                    <!-- Dex / Team view switch (mirrored in #builder-data) -->
+                    <div class="dex-team-toggle" role="tablist">
+                        <div class="dtt-btn dtt-active" data-view="dex">Dex</div>
+                        <div class="dtt-btn" data-view="team">Team</div>
+                    </div>
                     <!-- Identity hero: sprite + name/id + type pills -->
                     <header class="sp-hero">
                         <img id="species-front" class="interactible sp-hero-sprite">
@@ -243,34 +248,39 @@
                     </div>
                 </div>
                 <div id="builder-data" class="data-data" style="display: none;">
+                    <!-- Dex / Team view switch (mirrored in #species-data) -->
+                    <div class="dex-team-toggle" role="tablist">
+                        <div class="dtt-btn" data-view="dex">Dex</div>
+                        <div class="dtt-btn dtt-active" data-view="team">Team</div>
+                    </div>
                     <div class="builder-bot">
-                        <div class="builder-mon"></div>
-                        <div class="builder-mon"></div>
-                        <div class="builder-mon"></div>
-                        <div class="builder-mon"></div>
-                        <div class="builder-mon"></div>
-                        <div class="builder-mon"></div>
-                        <div class="builder-tools">
-                            <div class="bi-btn-row">
-                                <div id="defensive-cov" class="sel-active"><span>Defensive Coverage</span></div>
-                                <div id="offensive-cov" class="sel-n-active"><span>Offensive Coverage</span></div>
-                            </div>
-                            <div id="builder-def-cov">
-                                
-                            </div>
-                            <div id="builder-off-cov" style="display: none;">
-                                <span>click to see which pokemon has a super effective move against</span>
-                                <div id="builder-off-types" class="builder-type-row">
-
-                                </div>
-                            </div>
-                            <div id="builder-screenshot" class="btn btn-hover">
-                                <span>Team as a screenshot</span>
-                            </div>
+                        <div class="bld-team">
+                            <div class="builder-mon"></div>
+                            <div class="builder-mon"></div>
+                            <div class="builder-mon"></div>
+                            <div class="builder-mon"></div>
+                            <div class="builder-mon"></div>
+                            <div class="builder-mon"></div>
+                        </div>
+                        <div class="bld-actions">
                             <div id="builder-import" class="btn btn-hover">
                                 <span>Import / Export</span>
                             </div>
+                            <div id="builder-screenshot" class="btn btn-hover">
+                                <span>Screenshot</span>
+                            </div>
                         </div>
+                        <section class="sp-card bld-cov-card">
+                            <div class="bld-cov-tabs">
+                                <div id="defensive-cov" class="bld-cov-tab sel-active"><span>Defensive</span></div>
+                                <div id="offensive-cov" class="bld-cov-tab sel-n-active"><span>Offensive</span></div>
+                            </div>
+                            <div id="builder-def-cov"></div>
+                            <div id="builder-off-cov" style="display: none;">
+                                <span class="bld-cov-hint">Tap types below to highlight team moves that hit them super-effectively.</span>
+                                <div id="builder-off-types" class="builder-type-row"></div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -527,6 +537,9 @@
                 <option value="none">None</option>
                 <option value="Vanilla">Vanilla</option>
             </select>
+        </div>
+        <div class="settings-row">
+            <button id="open-team-savefile">Import Team from savefile</button>
         </div>
         <div class="settings-row">
             <button id="import-comsets">Import community sets from file</button>

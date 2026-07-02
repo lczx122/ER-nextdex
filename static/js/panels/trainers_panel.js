@@ -2,7 +2,7 @@ import { getSpritesURL, redirectSpecie, getSpritesShinyURL } from "./species/spe
 import { queryFilter2, queryFilter3 } from "../filters.js"
 import { gameData } from "../data_version.js"
 import { AisInB, e, JSHAC } from "../utils.js"
-import { setFullTeam } from "./team_builder.js"
+import { setFullTeam, showTeamBuilder } from "./team_builder.js"
 import { getGEN3HP } from "../load_save.js"
 
 const PARTY_NORMAL = 0
@@ -136,8 +136,7 @@ function setPartyPanel(party) {
         }
         frag.append(pokeDiv)
     }
-    // Team builder removed: no "Edit in builder" entry point.
-    $('#trainers-team').empty().append(frag)
+    $('#trainers-team').empty().append(frag).append(getNodeRedirectToEditorPokemon(party))
 }
 
 
@@ -281,8 +280,7 @@ export function getTextNature(nature) {
 function getNodeRedirectToEditorPokemon(party) {
     const redirectTeamBuilder = () => {
         setFullTeam(party)
-        $('#btn-species').click()
-        if ($('#btn-species').find('.big-select').text() === "Species") $('#btn-species').click()
+        showTeamBuilder()
     }
     return JSHAC([
         e('div', 'trainer-go-edition', null, { onclick: redirectTeamBuilder }), [

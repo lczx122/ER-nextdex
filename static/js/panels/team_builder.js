@@ -2,8 +2,6 @@ import { gameData } from "../data_version.js"
 import { e, JSHAC } from "../utils.js"
 import { createPokemon, getTextNature } from "./trainers_panel.js"
 import { getSpritesURL, getSpritesShinyURL } from "./species/species_panel.js"
-import { createInformationWindow } from "../window.js"
-import { cubicRadial } from "../radial.js"
 import { saveToLocalstorage, fetchFromLocalstorage, getHintInteractibilityClass } from "../settings.js"
 import { getDefensiveCoverage, getMoveEffectiveness } from "../weakness.js"
 import { longClickToFilter } from "../filters.js"
@@ -189,22 +187,29 @@ function save() {
     saveToLocalstorage("team-builder", saveObj)
 }
 
+/** Switch the Species panel between the dex detail and the team builder. */
+function setBuilderView(view) {
+    const team = view === 'team'
+    $('#species-data').toggle(!team)
+    $('#builder-data').toggle(team)
+    document.querySelectorAll('.dtt-btn').forEach((btn) => {
+        btn.classList.toggle('dtt-active', btn.dataset.view === view)
+    })
+    if (team) {
+        updateTeamWeaknesses()
+        updateOffensiveTypes()
+    }
+}
+
+/** Open the team builder from anywhere (e.g. the trainers "Edit in builder"). */
+export function showTeamBuilder() {
+    if (!$('#btn-species').hasClass('btn-active')) $('#btn-species').trigger('click')
+    setBuilderView('team')
+}
+
 export function setupTeamBuilder() {
-    let selected = 0
-    const buttonArrayMap = [
-        ["#builder-editor-btn", "#builder-editor"],
-        ["#builder-team-btn", "#builder-team"]
-    ]
-    buttonArrayMap.forEach((selection, index, selectionArray) => {
-        const btn = $(selection[0])
-        const dataTop = $(selection[1])
-        btn.on('click', () => {
-            $(selectionArray[selected][0]).removeClass("btn-active").addClass("btn-n-active")
-            btn.removeClass("btn-n-active").addClass("btn-active")
-            $(selectionArray[selected][1]).hide()
-            dataTop.show()
-            selected = index
-        })
+    document.querySelectorAll('.dtt-btn').forEach((btn) => {
+        btn.onclick = () => setBuilderView(btn.dataset.view)
     })
     $('#builder-data').find('.builder-mon').each(function (index, value) {
         if (teamData[index].spc) {
@@ -395,115 +400,185 @@ function deletePokemon(jNode, viewID) {
 
 function addPlaceholder(jNode, viewID) {
     const isTouchPad = navigator.maxTouchPoints
-    let placeholder
-    if (isTouchPad) {
-        placeholder = e('div', "builder-placeholder", "tap to add the selected pokemon from the list")
-    } else {
-        placeholder = e('div', "builder-placeholder", "drop a mon from the list or click to add the selected pokemon from the list")
-    }
-    placeholder.onclick = () => {
-        const pokeID = $('#species-list .sel-active')[0].dataset.id
-        teamData[viewID].init(pokeID)
-        createPokeView(jNode, viewID)
-        updateTeamWeaknesses()
-    }
+    const hint = isTouchPad
+        ? "Pick a Pokémon in the list, then tap here"
+        : "Drop a Pokémon here, or select one in the list and click"
+    const placeholder = JSHAC([
+        e('div', 'builder-placeholder', null, {
+            onclick: () => {
+                const sel = $('#species-list .sel-active')[0]
+                if (!sel) return
+                teamData[viewID].init(+sel.dataset.id)
+                createPokeView(jNode, viewID)
+                updateTeamWeaknesses()
+                updateOffensiveTypes()
+            }
+        }), [
+            e('div', 'builder-placeholder-plus', '+'),
+            e('div', 'builder-placeholder-hint', hint),
+        ]
+    ])
     jNode.append(placeholder)
+}
+
+/* ------------------------------------------------------------------ SHEETS
+ * A single reusable bottom sheet replaces the old radial menus + floating
+ * information windows. Editing a slot's ability / moves / item / nature /
+ * stats happens inline in the sheet — no overlays.
+ */
+let _activeSheet = null
+export function closeBuilderSheet() {
+    if (!_activeSheet) return
+    _activeSheet.remove()
+    _activeSheet = null
+}
+function openBuilderSheet(title, contentNode) {
+    closeBuilderSheet()
+    const backdrop = e('div', 'bld-sheet-backdrop', null, {
+        onclick: (ev) => { if (ev.target === backdrop) closeBuilderSheet() }
+    })
+    const closeBtn = e('div', 'bld-sheet-close', '✕', { onclick: closeBuilderSheet })
+    const sheet = JSHAC([
+        e('div', 'bld-sheet'), [
+            e('div', 'bld-sheet-head'), [
+                e('div', 'bld-sheet-title', title),
+                closeBtn,
+            ],
+            e('div', 'bld-sheet-body'), [
+                contentNode,
+            ],
+        ]
+    ])
+    backdrop.append(sheet)
+    document.body.append(backdrop)
+    // next frame so the slide-up transition runs
+    requestAnimationFrame(() => backdrop.classList.add('bld-sheet-open'))
+    _activeSheet = backdrop
+    const input = backdrop.querySelector('input')
+    if (input) input.focus()
+}
+
+function openAbilitySheet(poke, viewID, rerender) {
+    const content = overlayEditorAbilities(poke.baseSpc, (abiID) => {
+        poke.abi = abiID
+        poke.abiName = gameData.abilities[poke.baseSpc.stats.abis[abiID]].name
+        save()
+        rerender()
+        updateTeamWeaknesses()
+        closeBuilderSheet()
+    })
+    openBuilderSheet('Ability', content)
+}
+
+function openMoveSheet(poke, viewID, rerender) {
+    let active = 0
+    const slotsRow = e('div', 'bld-move-slots')
+    const pickerHost = e('div', 'bld-move-picker-host')
+    const renderSlots = () => {
+        $(slotsRow).empty()
+        poke.moves.forEach((moveID, i) => {
+            const move = gameData.moves[moveID]
+            const type = gameData.typeT[move.types[0]].toLowerCase()
+            slotsRow.append(e('div', `bld-move-slot ${type}-t ${i === active ? 'bld-move-slot-active' : ''}`,
+                move.name || '—', {
+                    onclick: () => { active = i; renderSlots(); loadPicker() }
+                }))
+        })
+    }
+    const loadPicker = () => {
+        $(pickerHost).empty().append(movePicker(poke.allMoves, (moveIndex) => {
+            poke.moves[active] = poke.allMoves[moveIndex]
+            const compactMove = gameData.moves[poke.moves[active]]
+            if (compactMove.usesHpType || compactMove.NAME.split("|")[1]) {
+                poke.hpType = +(compactMove.NAME.split("|")[1] || 0)
+            }
+            save()
+            rerender()
+            updateOffensiveTypes()
+            renderSlots()
+        }))
+    }
+    renderSlots()
+    loadPicker()
+    openBuilderSheet('Moves', JSHAC([
+        e('div', 'bld-move-sheet'), [
+            slotsRow,
+            pickerHost,
+        ]
+    ]))
+}
+
+function openItemSheet(poke, viewID, rerender) {
+    openBuilderSheet('Item', listPicker(itemList, (itemID) => {
+        poke.item = itemID
+        save()
+        rerender()
+        closeBuilderSheet()
+    }))
+}
+
+function openNatureSheet(poke, viewID, rerender) {
+    openBuilderSheet('Nature', listPicker(gameData.natureT.map(x => getTextNature(x)), (natureID) => {
+        poke.nature = natureID
+        save()
+        rerender()
+        closeBuilderSheet()
+    }))
+}
+
+function openStatsSheet(poke, viewID, rerender) {
+    const host = e('div', 'bld-stats-host')
+    let field = 'evs'
+    const statsCallback = (f, index, value) => {
+        poke[f][index] = +value
+        save()
+        rerender()
+    }
+    const render = () => { $(host).empty().append(editionStats(field, poke, statsCallback)) }
+    const tab = (label, f) => e('div', `bld-stats-tab ${field === f ? 'bld-stats-tab-active' : ''}`, label, {
+        onclick: (ev) => {
+            field = f
+            ev.currentTarget.parentElement.querySelectorAll('.bld-stats-tab')
+                .forEach(t => t.classList.toggle('bld-stats-tab-active', t.innerText === label))
+            render()
+        }
+    })
+    const tabs = e('div', 'bld-stats-tabs')
+    tabs.append(tab('EVs', 'evs'), tab('IVs', 'ivs'))
+    render()
+    openBuilderSheet('Stats', JSHAC([
+        e('div', 'bld-stats-sheet'), [
+            tabs,
+            host,
+        ]
+    ]))
 }
 
 function feedPokemonEdition(jNode, viewID) {
     const poke = teamData[viewID]
     const view = teamView[viewID]
+    // Any edit re-renders just this slot (keeps nature colouring, HP-type move
+    // names and EV colours correct) and re-saves.
+    const rerender = () => createPokeView(view.node, viewID)
 
     const spriteDiv = jNode.find('.trainer-poke-sprite')[0]
     const abilityDiv = jNode.find('.trainers-poke-ability')[0]
     const moveDiv = jNode.find('.trainers-poke-moves')[0]
-
-    const rightDiv = e("div", "builder-editor-right")
     const itemDiv = jNode.find('.trainers-poke-item')[0]
     const natureDiv = jNode.find('.trainers-poke-nature')[0]
     const statsDiv = jNode.find('.trainers-stats-row')[0]
 
-    spriteDiv.onclick = () => {
+    if (spriteDiv) spriteDiv.onclick = (ev) => {
+        ev.stopPropagation()
         poke.isShiny = !poke.isShiny
         view.sprite[0].src = poke.getSpritesURL()
         save()
     }
-    abilityDiv.onclick = (ev) => {
-        ev.stopPropagation() //if you forget this the window will instantly close
-        const overlayNode = overlayEditorAbilities(teamData[viewID].baseSpc, (abiID) => {
-            poke.abi = abiID
-            poke.abiName = gameData.abilities[poke.baseSpc.stats.abis[abiID]].name
-            view.abi.text(poke.abiName)
-            abilityDiv.innerText = poke.abiName
-            updateTeamWeaknesses()
-            save()
-        })
-        createInformationWindow(overlayNode, ev, "", true)
-    }
-    moveDiv.onclick = (ev) => {
-        ev.stopPropagation()
-        const overlayNode = cubicRadial(
-            poke.moves.map((x, index) => {
-                return [
-                    gameData.moves[x].name,
-                    () => {
-                        const moveCallback = (moveID) => {
-                            poke.moves[index] = poke.allMoves[moveID]
-                            const moveName = poke.allMovesName[moveID]
-                            view.moves[index].innerText = moveName
-                            const moveType = gameData.typeT[gameData.moves[poke.moves[index]].types[0]].toLowerCase()
-                            view.moves[index].className = `trainers-poke-move ${moveType}-t`
-                            const compactMove = gameData.moves[poke.moves[index]]
-                            if (compactMove.usesHpType || compactMove.NAME.split("|")[1]) {
-                                poke.hpType = +(compactMove.NAME.split("|")[1] || 0)
-                            }
-                            save()
-                            updateOffensiveTypes()
-                        }
-                        createInformationWindow(
-                            movePicker(poke.allMoves, moveCallback),
-                            ev, "focus", true, true
-                        )
-                    }
-                ]
-            }), "6em", "1em"
-        )
-        createInformationWindow(overlayNode, ev, "mid")
-    }
-    const itemCallback = (itemID) => {
-        poke.item = itemID
-        view.item.text(itemDiv.innerText = gameData.items[itemID].name)
-        save()
-    }
-    const natureCallback = (natureID) => {
-        poke.nature = natureID
-        createPokeView(view.node, viewID) //because nature has the coloring to reproduce, it's simpler to simply redo
-        save()
-    }
-    const statsCallback = (field, index, value) => {
-        poke[field][index] = +value
-        createPokeView(view.node, viewID) //same reason as nature
-        save()
-    }
-    statsDiv.onclick = itemDiv.onclick = natureDiv.onclick = (ev) => {
-        ev.stopPropagation()
-        const overlayNode = cubicRadial([
-            ["Items", (ev) => {
-                createInformationWindow(listPicker(itemList, itemCallback), ev, "focus")
-            }],
-            ["Nature", (ev) => {
-                createInformationWindow(listPicker(gameData.natureT.map(x => getTextNature(x)), natureCallback),
-                    ev, "focus")
-            }],
-            ["IVs", (ev) => {
-                createInformationWindow(editionStats("ivs", teamData[viewID], statsCallback), ev)
-            }],
-            ["EVs", (ev) => {
-                createInformationWindow(editionStats("evs", teamData[viewID], statsCallback), ev)
-            }],
-        ], "6em", "1em")
-        createInformationWindow(overlayNode, ev, "mid")
-    }
+    if (abilityDiv) abilityDiv.onclick = (ev) => { ev.stopPropagation(); openAbilitySheet(poke, viewID, rerender) }
+    if (moveDiv) moveDiv.onclick = (ev) => { ev.stopPropagation(); openMoveSheet(poke, viewID, rerender) }
+    if (itemDiv) itemDiv.onclick = (ev) => { ev.stopPropagation(); openItemSheet(poke, viewID, rerender) }
+    if (natureDiv) natureDiv.onclick = (ev) => { ev.stopPropagation(); openNatureSheet(poke, viewID, rerender) }
+    if (statsDiv) statsDiv.onclick = (ev) => { ev.stopPropagation(); openStatsSheet(poke, viewID, rerender) }
 }
 
 export function overlayEditorAbilities(pokebase, callbackOnclick) {
